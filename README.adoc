@@ -1,0 +1,51 @@
+= OpenShift Container Platform Developer Day
+
+This is a developer day workshop for OpenShift Container Platform
+
+== Prerequisites
+
+* An OCP 4.x Cluster (currently on 4.1 cluster you will need 4.2 dev console installed)
+* A workstation with command line tools `oc`,`kubectl` and `odo` installed
+* A user account on this cluster
+
+== Table of Contents
+
+* Setting up client tools
+
+=== Using OpenShift Developer Console
+* Explore OpenShift Developer Web Console
+* Deploy an application using Dev Console
+
+=== Using Command line tools
+* Deploy an application using `oc` CLI
+* Using `odo` CLI
+
+=== Using an IDE
+* Using CodeReady Workspaces build containerized application in a container
+* Debugging an application using CodeReady Workspaces
+
+=== Running Applications on OpenShift Cluster
+* Deploy a multi-tiered application
+* Scaling Application Instances
+* Deploying binaries artifacts
+* Configuring health probes
+* Using web-hooks for build automation
+* Rollback deployments
+* Using SSL
+* Using ConfigMaps
+* Using Persistent Storage <<future>>
+* Deploy a serverless application <<future>>
+
+=== DevOps
+* Code promotion across environments
+* Creating a pipeline with Jenkins on OpenShift
+* Creating a lightweight pipeline with Tekton <<future>>
+* Blue Green Deployments
+* AB Testing
+
+=== Troubleshooting
+* Troubleshoot application failures
+* Using Kibana to analyze application logs
+* Monitoring application metrics
+
+
