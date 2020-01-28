@@ -1,0 +1,48 @@
+= Explore OpenShift Developer Console
+
+== Prerequisites
+* You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
+* You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
+
+== Introduction
+
+OpenShift 4.x provides a Developer Web Console for anyone trying to deploy and manage applications to the cluster. This GUI is different from Administration Console that is typically used by cluster administrators. Developer Web Console is used by application developers and deployers, applicaton operations, or anyone with application focus. 
+
+== Explore
+
+* Paste the Web Console URL in the browser.  We recommend using Chrome. It will ask you to login.
+
+image::./images/devconsole1.png[image]
+
+* Select `htpasswd` and login with your credentials ie,`username` and `password` assigned to you.
+**NOTE** Most likely your workshop environment has user authentication setup using `htpasswd`. OpenShift integrates with a variety of authentication providers. It is possible that your workshop is setup to authenticate using other mechanisms such as `github` or other forms of authentication. If you don't see `htpasswd` ask your workshop coordinator.
+
+* Once you login, you'll see a page similar to what is shown below. Notice your username on the right top corner. Also notice the menu bar on the left.
+
+image::./images/devconsole2.png[image]
+
+* Select Create Project button item to create a new project. Name the project based on your username `USER?-project` by substituting `USER?` with the username assigned to you. Project names are unique in a multi-user cluster.
+
+* You can now toggle to Developer view by pressing on the `Administrator` dropdown and selecting `Developer`. In this lab we will focus on Developer view.
+
+image::./images/devconsole3.png[image]
+
+* You will now see the developer console. This console has a Menu on the left and the main area shows different ways to deploy workloads in this project.
+
+image::./images/devconsole4.png[image]
+
+* Take your time and explore menu options.
+** **Topology** shows the applications deployed. Since we haven't deployed anything yet, it just shows different ways to deploy workloads in this project
+** **Builds** shows the openshift build configurations. Once a build configuration is created, you can run build, view and edit build configuration, view build logs etc.
+** **Pipelines** option takes you to OpenShift pipeline. Here you can view, edit and run tekton pipelines, pipeline resources, tasks, view pipelinerun logs and so on. 
+** **Advanced** Section includes a bunch of subsections.
+*** **Project Details** shows the status of the project, inventory of all the objects deployed in this project, utilization of cpu, memory etc, resource quotas, events etc.
+*** **Project Access** allows you to add members and change their permissions
+*** **Metrics** allows you to query project metrics 
+*** **Search** allows you to search all the artifacts in this project
+*** **Events** shows a stream of project events
+
+
+
+
+
