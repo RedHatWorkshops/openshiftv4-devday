@@ -125,6 +125,16 @@ image::./images/devconsoleapp10.png[image]
 
 * The application is deleted and you will be back to a blank topology with options to deploy a new app again.
 
+## Delete Project
+
+* Switch back to **Administrator** Console to view a list of projects
+* Select the menu option on the right end of the project and click on `Delete Project`
+
+image::./images/devconsoleapp11.png[image] 
+
+* Confirm deletion by typing in the project name and click on **Delete** button
+
+
 ## Summary
 In this lab, we learnt to deploy an application using OpenShift Developer Console, explored the application details, and cleaned it up.
 
