@@ -42,7 +42,8 @@ image::./images/devconsole4.png[image]
 *** **Search** allows you to search all the artifacts in this project
 *** **Events** shows a stream of project events
 
-
+## Summary
+In this lab we logged into the cluster using Web Console and understood the layout and navigation of Developer console which is typically used by the application teams (developers, deployers, application operations etc)
 
 
 
