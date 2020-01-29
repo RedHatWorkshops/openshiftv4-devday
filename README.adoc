@@ -14,10 +14,10 @@ This is a developer day workshop for OpenShift Container Platform
 
 === Using OpenShift Developer Console
 * <<1.ExploreDeveloperConsole.adoc#, Explore OpenShift Developer Web Console>>
-* <<2.DeployAppUsingWebConsole.adoc#,Deploy an application using Dev Console>>
+* <<2.DeployAppUsingWebConsole.adoc#, Deploy an application using Dev Console>>
 
 === Using Command line tools
-* Deploy an application using `oc` CLI
+* <<3.DeployAppUsingOC.adoc#, Deploy an application using `oc` CLI>>
 * Using `odo` CLI
 
 === Using an IDE
