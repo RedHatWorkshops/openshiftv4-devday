@@ -1,0 +1,202 @@
+= Binary Deployment of a war file
+
+== Introduction
+Java developers are used to creating binary artifacts such as war file using continuous integration process and test the binary on their workstation. 
+
+OpenShift SourceToImage (S2I) process includes an assemble script that copies the source code from a git repository, invokes a maven build, places the resultant war file in the deployments folder, builds a new application image and pushes that image into the registry.
+
+While OpenShift S2I can take your source code and build it into a container, there is also an approach to use a binary (such as a war file) created on your workstation to be used as input instead of source code. This lab explains how to using a binary as input to create and deploy an application on OpenShift.
+
+In this exercise you will learn to deploy a war file. We will assume that you built your source code outside of OpenShift build process and want to download the WAR file on your workstation.
+
+== Deploying a war file
+
+*Step 1: Create project & folder structure*
+
+[source,sh]
+----
+oc new-project binarydeploy-UserName
+mkdir binarytest && cd binarytest
+mkdir deployments
+----
+
+**Note**: You can also create a modules directory at the same level as `deployments` above and have additional modules there or configuration files. As an example:
+....
+mkdir modules
+cd modules
+mkdir cfg
+cd cfg
+touch config-1.cfg config-2.cfg
+....
+
+*Step 2: Create/Copy a war file*
+
+Create a war file and place it in deployments directory.
+
+We have provided a warfile for a simple petstore application
+https://raw.githubusercontent.com/RedHatWorkshops/ps/master/deployments/ROOT.war[here]. If you want to use this war file
+
+```
+$ wget https://raw.githubusercontent.com/RedHatWorkshops/ps/master/deployments/ROOT.war
+
+$ mv ROOT.war deployments/  
+```
+**Note** that the war file needs to be in the `deployments` folder. You can verify running `ls -lR` as shown below.
+
+....
+$ ls -lR
+
+total 0
+drwxr-xr-x 3 veer staff 102 Jul 5 2015 deployments
+
+./deployments:
+
+total 12024
+-rwxr-xr-x 1 veer staff 6155452 Jul 5 2015 ROOT.war
+....
+
+*Step 3: Using builder image*
+
+Create a new build using the builder image of your choice. Here we are using JBoss EWS (tomcat 8) image. The flag `binary=true` indicates that this build will use the binary content instead of the url to the source code.
+
+Here I am naming my application as *myapp*. So all the artifacts will
+get the name *myapp*.
+
+....
+$ oc new-build --image-stream=jboss-webserver30-tomcat8-openshift:1.3 --binary=true --name=myapp                                     
+--> Found image decb6b8 (2 years old) in image stream "openshift/jboss-webserver30-tomcat8-openshift" under tag "1.3" for "jboss-webserver30-tomcat8-openshift:1.3"
+                                                                                                                                                                   
+    JBoss Web Server 3.0                                                                                                                                           
+    --------------------                                                                                                                                           
+    Platform for building and running web applications on JBoss Web Server 3.0 - Tomcat v8                                                                         
+                                                                                                                                                                   
+    Tags: builder, java, tomcat8                                                                                                                                   
+                                                                                                                                                                   
+    * A source build using binary input will be created                                                                                                            
+      * The resulting image will be pushed to image stream tag "myapp:latest"                                                                                      
+      * A binary build was created, use 'oc start-build --from-dir' to trigger a new build                                                                         
+                                                                                                                                                                   
+--> Creating resources with label build=myapp ...                                                                                                                  
+    imagestream.image.openshift.io "myapp" created                                                                                                                 
+    buildconfig.build.openshift.io "myapp" created                                                                                                                 
+--> Success 
+....
+
+*Step 4: Executing the build*
+
+Start the build by uploading the contents of your `deployments` directory. Make sure you are in the parent folder where you created the `deployments` folder inside previously. Remember the war file is in the `deployments` folder. The jboss-ews builder image knows to copy the contents of the `deployments` folder to the `deployments` directory and then builds the application image.
+
+....
+$ oc start-build myapp --from-dir=.
+
+Uploading directory "." as binary input for the build ...
+build "myapp-1" started
+....
+
+You can check the build logs by executing:
+
+....
+$ oc logs myapp-1-build -f                                                                                                           
+Caching blobs under "/var/cache/blobs".                                                                                                                            
+Getting image source signatures                                                                                                                                    
+Copying blob sha256:5d448162298455ec38635223e668573d6f0c1a5f4b46ae5dd54e1e0b30de83ab                                                                               
+Copying blob sha256:26e5ed6899dbf4b1e93e0898255e8aaf43465cecd3a24910f26edb5d43dafa3c                                                                               
+Copying blob sha256:f591071b502f5c9eda5bff0f5d5adff911075d3be7081c86aa3b3690879ccb20                                                                               
+Copying blob sha256:66dbe984a319ca6d40dc10c2c561821128a0bd8967e0cbd8cc2a302736041ffb                                                                               
+Copying blob sha256:39fe8b1d3a9cb13a361204c23cf4e342d53184b4440492fa724f4aeb4eb1d64f                                                                               
+Copying blob sha256:78f9ea175a0a36eeccd5399d82c03146149c4d6ad6afa134cb314c7d3be7dab9                                                                               
+Writing manifest to image destination                                                                                                                              
+Storing signatures                                                                                                                                                 
+Generating dockerfile with builder image image-registry.openshift-image-registry.svc:5000/openshift/jboss-webserver30-tomcat8-openshift@sha256:0089883f8e4387618946
+cd24378a447b8cf7e5dfaa146b94acab27fc5e170a14                                                                                                                       
+STEP 1: FROM image-registry.openshift-image-registry.svc:5000/openshift/jboss-webserver30-tomcat8-openshift@sha256:0089883f8e4387618946cd24378a447b8cf7e5dfaa146b94
+acab27fc5e170a14                                                                                                                                                   
+STEP 2: LABEL "io.openshift.build.image"="image-registry.openshift-image-registry.svc:5000/openshift/jboss-webserver30-tomcat8-openshift@sha256:0089883f8e438761894
+6cd24378a447b8cf7e5dfaa146b94acab27fc5e170a14" "io.openshift.build.source-location"="/tmp/build/inputs"                                                            
+STEP 3: ENV OPENSHIFT_BUILD_NAME="myapp-1" OPENSHIFT_BUILD_NAMESPACE="binarydeploy-user1"                                                                          
+STEP 4: USER root                                                                                                                                                  
+STEP 5: COPY upload/src /tmp/src                                                                                                                                   
+STEP 6: RUN chown -R 185:0 /tmp/src                                                                                                                                
+STEP 7: USER 185                                                                                                                                                   
+STEP 8: RUN /usr/local/s2i/assemble                                                                                                                                
+Copying all war artifacts from /tmp/src directory into /opt/webserver/webapps for later deployment...                                                              
+Copying all war artifacts from /tmp/src/deployments directory into /opt/webserver/webapps for later deployment...                                                  
+'/tmp/src/deployments/ROOT.war' -> '/opt/webserver/webapps/ROOT.war'                                                                                               
+STEP 9: CMD /usr/local/s2i/run                                                                                                                                     
+STEP 10: COMMIT temp.builder.openshift.io/binarydeploy-user1/myapp-1:68fa1706                                                                                      
+Getting image source signatures                                                                                                                                    
+Copying blob sha256:c1eac31e742f9787152adeb8d82dbff43882214993210f684a432ec5b8f276ec                                                                               
+Copying blob sha256:9161a60cc9644083de5cafc67d0efe1d03aeabe6159f1df397dcccf2a049e533                                                                               
+Copying blob sha256:c1647cf3b72a31c070f609575aac699971d365480f7aff2bb9a983faf512e2fb                                                                               
+Copying blob sha256:cbff328cfc7cd882d24817de0afa16c033c13f41e9b8aa9a5d7d68d2276c1e54                                                                               
+Copying blob sha256:230d57d119424eb993e0c53e3295b76a74f03f8f15509e02535e18e4558915c3                                                                               
+Copying blob sha256:53497b8e19d78afc18b7005d647e127af730723b14cd1d24ed1dab0605cf123a                                                                               
+Copying blob sha256:97051fa237bede794309b0e90877f1b39952423ba9b987f2fd9377bdb1b99c00                                                                               
+Copying config sha256:459efe1ae6900107c4210b270c9fe60ed7011e02eed71823b6c20ccac0ebb7c7                                                                             
+Writing manifest to image destination                                                                                                                              
+Storing signatures                                                                                                                                                 
+459efe1ae6900107c4210b270c9fe60ed7011e02eed71823b6c20ccac0ebb7c7                                                                                                   
+459efe1ae6900107c4210b270c9fe60ed7011e02eed71823b6c20ccac0ebb7c7                                                                                                   
+                                                                                                                                                                   
+Pushing image image-registry.openshift-image-registry.svc:5000/binarydeploy-user1/myapp:latest ...                                                                 
+Getting image source signatures                                                                                                                                    
+Copying blob sha256:78f9ea175a0a36eeccd5399d82c03146149c4d6ad6afa134cb314c7d3be7dab9                                                                               
+Copying blob sha256:5d448162298455ec38635223e668573d6f0c1a5f4b46ae5dd54e1e0b30de83ab                                                                               
+Copying blob sha256:97051fa237bede794309b0e90877f1b39952423ba9b987f2fd9377bdb1b99c00                                                                               
+Copying blob sha256:26e5ed6899dbf4b1e93e0898255e8aaf43465cecd3a24910f26edb5d43dafa3c                                                                               
+Copying blob sha256:f591071b502f5c9eda5bff0f5d5adff911075d3be7081c86aa3b3690879ccb20                                                                               
+Copying blob sha256:66dbe984a319ca6d40dc10c2c561821128a0bd8967e0cbd8cc2a302736041ffb                                                                               
+Copying blob sha256:39fe8b1d3a9cb13a361204c23cf4e342d53184b4440492fa724f4aeb4eb1d64f                                                                               
+Copying config sha256:459efe1ae6900107c4210b270c9fe60ed7011e02eed71823b6c20ccac0ebb7c7                                                                             
+Writing manifest to image destination                                                                                                                              
+Storing signatures                                                                                                                                                 
+Successfully pushed image-registry.openshift-image-registry.svc:5000/binarydeploy-user1/myapp@sha256:0c4ebbc42fd9d2f9ed275df841ddc563cf13840f6df668de6892de22a12f7c
+a5                                                                                                                                                                 
+Push successful
+....
+
+**NOTE** that the above build executes S2I by copying war file from your workstation to the build pod.
+
+
+*Step 5: Create the application*
+
+Now create the application with the same name as what you gave for the build.
+
+Here we are using the name *myapp*, so that the rest of the objects such as deployment configuration and service are created with the same name and refer to the image-stream created earlier.
+
+....
+$ oc new-app myapp --allow-missing-imagestream-tags -l app.openshift.io/runtime=rh-tomcat                                            
+--> Found image 459efe1 (4 minutes old) in image stream "binarydeploy-user1/myapp" under tag "latest" for "myapp"                                                  
+                                                                                                                                                                   
+    JBoss Web Server 3.0                                                                                                                                           
+    --------------------                                                                                                                                           
+    Platform for building and running web applications on JBoss Web Server 3.0 - Tomcat v8                                                                         
+                                                                                                                                                                   
+    Tags: builder, java, tomcat8                                                                                                                                   
+                                                                                                                                                                   
+    * This image will be deployed in deployment config "myapp"                                                                                                     
+    * Ports 8080/tcp, 8443/tcp, 8778/tcp will be load balanced by service "myapp"                                                                                  
+      * Other containers can access this service through the hostname "myapp"                                                                                      
+                                                                                                                                                                   
+--> Creating resources with label app.openshift.io/runtime=rh-tomcat ...                                                                                           
+    deploymentconfig.apps.openshift.io "myapp" created                                                                                                             
+    service "myapp" created                                                                                                                                        
+--> Success                                                                                                                                                        
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:                                       
+     'oc expose svc/myapp'                                                                                                                                         
+    Run 'oc status' to view your app.
+....
+
+Now, expose the service as a route to be able to use it from the
+browser.
+
+....
+$ oc expose svc myapp                                                                                                                
+route.route.openshift.io/myapp exposed
+....
+
+You can use the route to access the application using the URL.
+
+```
+oc get route
+```
