@@ -307,3 +307,15 @@ hpademo   Deployment/hpademo   0%/50%          1         10        2          13
 hpademo   Deployment/hpademo   0%/50%          1         10        1          13m
 ```
 
+== Clean up
+
+Once you are done with your testing run
+`oc delete all --all` to clean up all the artifacts and `oc delete project ProjectName` to delete the project
+
+== Summary
+
+In this lab we have learnt to manually scale up and scale down, and idle the application. We have also learnt to use horizontal pod autoscaler to autoscale the application based on the workload.
+
+
+
+
