@@ -1,0 +1,8 @@
+== Installing Openshift CLI
+
+
+* Installing the
+link:https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html[oc] CLI
+
+* Installing 
+link:https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_developer_cli/installing-odo.html[odo]
