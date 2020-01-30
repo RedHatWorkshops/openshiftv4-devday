@@ -26,7 +26,7 @@ This is a developer day workshop for OpenShift Container Platform
 
 === Running Applications on OpenShift Cluster
 * Deploy a multi-tiered application
-* Scaling Application Instances
+* <<8.ApplicationScaling.adoc#,Scaling Application Instances>>
 * <<9.DeployBinaryArtifacts.adoc#,Deploying binaries artifacts>>
 * Configuring health probes
 * Using web-hooks for build automation

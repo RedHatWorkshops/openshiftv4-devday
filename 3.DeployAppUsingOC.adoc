@@ -198,5 +198,11 @@ You will notice that it has deleted the imagestream for the application, the dep
 
 You can run `oc get all` again to make sure the project is empty.
 
+You can now delete the project by running. Substitute your **UserName** in the command below.
+
+```
+oc delete project mycliproject-UserName
+```
+
 Congratulations!! You now know how to create a project, an application using an external docker image and navigate around. Get ready for more
 fun stuff!
