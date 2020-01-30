@@ -18,7 +18,7 @@ This is a developer day workshop for OpenShift Container Platform
 
 === Using Command line tools
 * <<3.DeployAppUsingOC.adoc#, Deploy an application using `oc` CLI>>
-* Using `odo` CLI
+* <<4.DeployAppUsingODO.adoc#, Deploy an application using `odo` CLI>>
 
 === Using an IDE
 * Using CodeReady Workspaces build containerized application in a container
