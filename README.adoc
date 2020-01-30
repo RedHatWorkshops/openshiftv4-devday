@@ -27,7 +27,7 @@ This is a developer day workshop for OpenShift Container Platform
 === Running Applications on OpenShift Cluster
 * Deploy a multi-tiered application
 * <<8.ApplicationScaling.adoc#,Scaling Application Instances>>
-* <<9.DeployBinaryArtifacts.adoc#,Deploying binaries artifacts>>
+* <<9.DeployBinaryArtifacts.adoc#,Deploying binary artifacts>>
 * Configuring health probes
 * Using web-hooks for build automation
 * Rollback deployments
@@ -40,7 +40,7 @@ This is a developer day workshop for OpenShift Container Platform
 * Code promotion across environments
 * Creating a pipeline with Jenkins on OpenShift
 * Creating a lightweight pipeline with Tekton <<future>>
-* Blue Green Deployments
+* <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
 * AB Testing
 
 === Troubleshooting
