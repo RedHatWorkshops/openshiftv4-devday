@@ -10,7 +10,8 @@ This is a developer day workshop for OpenShift Container Platform
 
 == Table of Contents
 
-* Setting up client tools
+=== Preparation
+* <<0-SettingUpClientTools.adoc#, Setting up client tools>>
 
 === Using OpenShift Developer Console
 * <<1.ExploreDeveloperConsole.adoc#, Explore OpenShift Developer Web Console>>
