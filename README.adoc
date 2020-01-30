@@ -13,11 +13,11 @@ This is a developer day workshop for OpenShift Container Platform
 * Setting up client tools
 
 === Using OpenShift Developer Console
-* Explore OpenShift Developer Web Console
-* Deploy an application using Dev Console
+* <<1.ExploreDeveloperConsole.adoc#, Explore OpenShift Developer Web Console>>
+* <<2.DeployAppUsingWebConsole.adoc#, Deploy an application using Dev Console>>
 
 === Using Command line tools
-* Deploy an application using `oc` CLI
+* <<3.DeployAppUsingOC.adoc#, Deploy an application using `oc` CLI>>
 * Using `odo` CLI
 
 === Using an IDE
@@ -26,8 +26,8 @@ This is a developer day workshop for OpenShift Container Platform
 
 === Running Applications on OpenShift Cluster
 * Deploy a multi-tiered application
-* Scaling Application Instances
-* Deploying binaries artifacts
+* <<8.ApplicationScaling.adoc#,Scaling Application Instances>>
+* <<9.DeployBinaryArtifacts.adoc#,Deploying binaries artifacts>>
 * Configuring health probes
 * Using web-hooks for build automation
 * Rollback deployments

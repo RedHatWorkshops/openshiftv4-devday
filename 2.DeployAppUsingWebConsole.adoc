@@ -1,0 +1,146 @@
+# Deploy an Application Using Web Console
+
+## Prerequisites
+* Access to an OpenShift Cluster and a Web Console URL from your workshop coordinator
+
+## Introduction
+
+There are different ways to deploy workloads to an openshift cluster. Here we will explore deploying a simple web application using OpenShift developer console.
+
+What happens when we deploy an application?
+
+OpenShift creates a bunch of objects when you deploy an application. Some key objects:
+
+* **Build Configuration**: If you are starting with source code or a dockerfile, the build configuration shows you where the source code is and the strategy to build the application, parameters to be passed to your build and more. You can explore and edit openshift build configuration YAML using web console, if you desire to change it. Each time you start a build, it runs a pod inside which the application build happens. The result of the build is typically a container image that gets saved in a container registry (integrated registry on your openshift cluster by default)
+* **Deployment** or **Deployment Configuration**: DeploymentConfig is an openshift concept that predates kubernetes deployment. You can use either of these. These are the configurations for how your application is deployed, the environment variables to be passed to our container, external configurations to be passed via configmaps, storage mounts etc. This defines the configuration for your running application. OpenShift runs a deployment pod that executes deployment and once your application pod stands up, the deployment pod completes.
+* **Service** Kubernetes service frontends a set of pods and proxies traffic to your application pods. 
+* **Route** OpenShift route is ingress to your application. Creation of route object results in a URL being added to the OpenShift router which becomes an entry point for your application from outside the cluster.
+
+In addition to the above, it may creates Secrets, ConfigMaps, ServiceAccounts and other objects too.
+
+When you explore a deployed application, make sure you look at the corresponding YAMLs for each of these objects.
+
+## Deploy an application
+
+* Log into Developer Console as explained <<1.ExploreDeveloperConsole.adoc#,here>> and create a project, if you have not already done so.
+
+* From the menu, choose `From Git` option
+image::./images/devconsoleapp1.png[image]
+
+* The next screen `Import from git` allows you to deploy an application from a git repository. 
+** We can choose the source code from a git repo. Also explore `Advanced Git Options` where you can input git context directory, choose a specific branch and source secret if you need to
+** **Builder Image** is the technology image that your source code uses as a base to build a container
+** **Name** and **Component Name** for the application
+** **Deployment** type that includes openshift deployment config, kubernetes deployment or knative service as options to choose from 
+
+image::./images/devconsoleapp2.png[image]
+
+Let us choose `Modern Web App` as the **Builder Image**. As soon as you select this, you will see a link to sample repository such as https://github.com/nodeshift-starters/react-web-app. 
+
+We will deploy this sample application as our code from github. So copy this URL and paste it as the **Git Repo URL**.
+
+**Application Name** and component **Name** will be auto generated. You can choose your own names if you want. I am choosing `webapp` as the **Application Name** and `react-sample` as my component **Name**.
+
+Choose **Deployment** as the option for **Resources** 
+
+Leave the checkbox for **Create a route to the application** as checked.
+
+Click on `Create` button
+
+* You will notice the topology view now changes to what is show in the figure below:
+
+image::./images/devconsoleapp3.png[image]
+
+* There are two circles here
+** Outer circle represents the application, It shows `webapp`, the name I gave as the **Application Name**
+** Inner circle represents the deployment named `react-sample`
+
+* Hover over the icon on different corners. You will notice `Build Running` on  the bottom left corner of the image. `Edit Source` on the bottom right and `Open URL`on the top right of the image above.
+
+* Clicking on `Build Running` takes you to `Build Logs`. OpenShift builds run in a pod that comes up and runs a source-to-image build. 
+
+image::./images/devconsoleapp4.png[image]
+
+**Source-to-Image** (S2I) process converts your source code into a container image. Builder Image that you chose earlier has the capability to do S2I. Builds do the following:
+
+** Clone source code from the git repo
+** Generate a Dockerfile
+** Build the source code (example compile the code) and create a binary
+** Execute container build using **buildah**
+** Push the resultant container image into integrated container registry running on OpenShift.
+
+Observe the build logs to note the above steps in the logs.
+
+* Once the S2I build is complete, deployment runs to deploy the application instance as a pod. At that point you will notice the pod starts running as shown below.
+
+image::./images/devconsoleapp5.png[image]
+
+
+* Now click on the URL icon on the top right 
+
+image::./images/devconsoleapp6.png[image] 
+
+which takes you to the running application in a new browser tab.
+
+You have successfully built and deployed an application using web console!!
+
+## Explore your application
+
+* Click on the deployment icon and it will show you details about that application on the right as shown below
+
+image::./images/devconsoleapp7.png[image] 
+
+* **Overview** tab that shows details of the deployment, number of pods running etc.
+
+* **Actions** drop down, allows you to make changes to the deployment. As an example, navigate to  **Actions**->**Edit Labels** and add a label `app.openshift.io/runtime=js` and **Save**. You will notice that the application shows the icon indicating JavaScript based application as shown below.
+
+image::./images/devconsoleapp8.png[image] 
+
+* **Resources** tab allows you to directly get to openshift resources such as Pods, Builds, Services, Route. So it is like a summary for all the objects related to this deployment. Navigate to each of these objects and also look at their YAMLs and understand the options that the WebConsole provides to edit these objects.
+
+=== Explore Project Menu on the top
+
+image::./images/devconsoleapp9.png[image] 
+
+* **Project** dropdown allows you to switch between the projects and Create new project
+* **Applications** dropdown allows you to filter the apps in the view, if you deploy multiple applications in this project
+* **Shortcuts** shows you command shortcuts to accomplish actions such as making a deployment part of an application (by `SHIFT+Drag`), connecting application components (by `Hover` over and drag the arrow) etc. 
+* You can switch between the **Topology** view and the **List** view by clicking on the List icon on the right.
+
+Lot more features will be available very soon on developer console such as
+* Showing Pod Count
+* Creating pipelines via console 
+and more
+
+Even if this lab is not updated, you can explore everything on the webconsole at this point.
+
+## Delete Application
+
+* Click on the Application circle. It will show the application details on the right
+
+image::./images/devconsoleapp10.png[image]
+* Now select **Actions**->**Delete Application**
+
+* It will prompt you to confirm the application name to delete. Type in the application name `web-app` in my case.
+
+* The application is deleted and you will be back to a blank topology with options to deploy a new app again.
+
+## Delete Project
+
+* Switch back to **Administrator** Console to view a list of projects
+* Select the menu option on the right end of the project and click on `Delete Project`
+
+image::./images/devconsoleapp11.png[image] 
+
+* Confirm deletion by typing in the project name and click on **Delete** button
+
+
+## Summary
+In this lab, we learnt to deploy an application using OpenShift Developer Console, explored the application details, and cleaned it up.
+
+
+
+
+
+
+
