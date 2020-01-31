@@ -42,7 +42,7 @@ This is a developer day workshop for OpenShift Container Platform
 * Creating a pipeline with Jenkins on OpenShift
 * Creating a lightweight pipeline with Tekton <<future>>
 * <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
-* AB Testing
+* <<21.ABTesting.adoc#,AB Testing>>
 
 === Troubleshooting
 * Troubleshoot application failures
