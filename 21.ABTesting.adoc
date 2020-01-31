@@ -1,0 +1,284 @@
+= AB Testing
+
+== Introduction
+
+With AB Testing you can introduce a new version of application and split traffic to the new version gradually instead of suddenly switching from one version to another.
+
+In this lab we will deploy two versions of the same application (app-a and app-b). Then we will configure the route in such a way that the traffic initially would be going to first version (app-a) and then we will gradually shift traffic from app-a to app-b.
+
+== Deploy app-a
+
+* Create a new project. **Remember** to substitute your username.
+
+....
+oc new-project abtest-UserName
+....
+
+* Deploy an application
+
+....
+oc new-app --image-stream=php --code=https://github.com/RedHatWorkshops/ab-deploy  --name=app-a
+....
+
+* Create a route and name it `abtest`
+....
+oc expose service app-a --name=abtest
+....
+
+* Verify the route created and note the URL
+
+....
+oc get route
+....
+
+* Wait until build completes by watching build logs
+
+....
+oc logs builds/app-a-1  
+....
+
+* Ensure app is deployed
+
+....
+$ oc get po                                                                            
+NAME             READY   STATUS      RESTARTS   AGE                                                         
+app-a-1-build    0/1     Completed   0          2m7s                                                        
+app-a-1-deploy   0/1     Completed   0          63s                                                         
+app-a-1-ndvjd    1/1     Running     0          54s 
+....
+
+* Test the app
+
+....
+$ curl $(oc get route abtest --template={{.spec.host}})                                
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+....
+
+This shows `I am VERSION 1` as the output.
+
+Let us run curl 20 times with `for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done`
+
+....
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
+one
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+....
+
+It always hits version 1.
+
+== Deploy app-b
+
+
+* We have a separate branch `v2`. Same exact app with a small change. This will be named `app-b`
+
+....
+oc new-app --image-stream=php --code=https://github.com/RedHatWorkshops/ab-deploy#v2  --name=app-b
+....
+
+* Watch and Wait until build completes
+
+....
+oc logs builds/app-b-1 -f 
+....
+
+* Note the service created is also called `app-b`
+
+....
+oc get svc
+....
+
+== Introducing app-b as Canary
+
+Now we will do AB testing by splitting traffic between services `app-a` and `app-b`. We want to send a small amount of traffic to `app-b`.
+
+* Look at the backends for our route `abtest`
+
+....
+$ oc set route-backends abtest                                                         
+NAME           KIND     TO     WEIGHT                                                                       
+routes/abtest  Service  app-a  100
+....
+
+You can see that all the traffic going to service`app-a`
+
+* Let us send 10% of traffic to service `app-b`, so that it acts as a canary receiving 1 out of 10 requests
+
+....
+$ oc set route-backends abtest app-a=9 app-b=1
+
+route.route.openshift.io/abtest backends updated
+....
+
+Verify the setting now
+
+....
+$ oc set route-backends abtest                                                         
+NAME           KIND     TO     WEIGHT                                                                       
+routes/abtest  Service  app-a  9 (90%)                                                                      
+routes/abtest  Service  app-b  1 (10%)
+....
+
+It shows that the traffic is now split between services `app-a` and `app-b` in the ratio of 90% and 10%.
+
+* Test the app now
+
+Let us again run curl 20 times with `for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done`
+
+You'll see out of every 10 requests 9 go to service `app-a` and 1 goes to service `app-b`
+
+....
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
+one
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
+....
+
+This is the behavior of a canary. 
+
+Canary is used to test to test waters; to make sure there are no issues.
+
+Let us say `app-b` canary is gone well and we want to gradually increase the amount of traffic to this new version.
+
+== Adjust the traffic split percentages
+
+* Let us make it 50-50 split this time
+
+....
+$ oc set route-backends abtest --adjust app-b=50%                                      
+route.route.openshift.io/abtest backends updated
+....
+
+and verify the change to note 50-50 split
+
+....
+$ oc set route-backends abtest                                                         
+NAME           KIND     TO     WEIGHT
+routes/abtest  Service  app-a  50 (50%)                                                                     
+routes/abtest  Service  app-b  50 (50%)
+....
+
+* Test again and note the traffic is evenly distributed between the two versions
+
+....
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
+one                                                                                                         
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48 
+....
+
+== Shift to new version
+
+* Let us completely shift to the new version 
+
+....
+$ oc set route-backends abtest --adjust app-b=100%                                     
+route.route.openshift.io/abtest backends updated
+
+$ oc set route-backends abtest                                                         
+NAME           KIND     TO     WEIGHT
+routes/abtest  Service  app-a  0 (0%)                                                                       
+routes/abtest  Service  app-b  100 (100%)
+....
+
+* Test again
+
+....
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
+one                                                                                                         
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
+ I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48
+....
+
+Notice that all the traffic is now hitting the new version.
+
+== Clean up
+
+* Delete application
+
+....
+oc delete all --all
+....
+
+* Delete the project; **substituting** the username in the command below
+....
+oc delete project abtest-UserName
+....
+
+== Summary
+
+In this lab we have learnt Canary and AB Testing to gradually shift the traffic from one version to another.
+
+

@@ -214,6 +214,18 @@ You should now see the new version of the recently deployed application with a g
 
 image::images/bluegreen2.png[image]
 
+== Clean up
+
+* Delete application
+
+....
+oc delete all --all
+....
+
+* Delete the project; **substituting** the username in the command below
+....
+oc delete project bluegreen-UserName
+....
 
 == Summary
 
