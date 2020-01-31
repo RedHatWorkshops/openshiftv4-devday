@@ -29,34 +29,23 @@ With OpenShift files that live on the container instance are ephemeral. This mea
 [options="header,footer"]
 |=======================
 |Volume Plug-in|ReadWriteOnce   |ReadOnlyMany    |  ReadWriteMany
-|AWS EBS    |[*]    |a
-|Azure File    |Item 2     |b
-|Azure Disk    |Item 3     |c
-|Cinder    |Three items|d
-|Fibre Channel  |Three items|d
-|GCE Persistent Disk  |Three items|d
-|HostPath    |Three items|d
-|iSCSI    |Three items|d
-|Local volume    |Three items|d
-|NFS    |Three items|d
-|VMware vSphere    |Three items|d
+|AWS EBS    |[*] | [ ] | [ ]
+|Azure File    |[*] | [ *] | [* ]
+|Azure Disk    |[*] | [ ] | [ ]
+|Cinder   |[*] | [ ] | [ ]
+|Fibre Channel  |[*] | [*] | [ ]
+|GCE Persistent Disk |[*] | [ ] | [ ]
+|HostPath  |[*] | [ ] | [ ]
+|iSCSI   |[*] | [*] | [ ]
+|Local volume  |[*] | [ ] | [ ]
+|NFS   | [*] | [*] | [*]
+| Red Hat OpenShift Container Storage| [*] | [ ] | [*]
+|vSphere    |[*] | [ ] | [ ]
 |=======================
 
-Volume Plug-in  | ReadWriteOnce  |  ReadOnlyMany | ReadWriteMany  targetserver
---|---|---|--
-AWS EBS  | :heavy_check_mark:  | :x:  | :x:  
-Azure File  | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark:
-Azure Disk  |  :heavy_check_mark: | :x:  | :x:
-Cinder  | :heavy_check_mark:  | :x:  | :x:
-Fibre Channel  | :heavy_check_mark:  | :heavy_check_mark:  | :x:
-GCE Persistent Disk  | :heavy_check_mark:  | :x:  |  :x:
-HostPath  | :heavy_check_mark:  |  :x: |  :x:
-iSCSI  | :heavy_check_mark:  | :heavy_check_mark:  | :x:
-Local volume  |  :heavy_check_mark: | :x:  | :x:
-NFS  | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark:
-VMware vSphere  | :heavy_check_mark:  | :x:  | :x:
  
-*PersistentVolumeClaim* is an API Object, which represents a request for storage by a developer. It is similar to a Pod in that Pods consume node resources and PVCs consume PV resources.
+*PersistentVolumeClaim* is an API Object, which represents a request for storage by a developer. It is similar to a Pod in that Pods consume node resources and PVCs consume PV resources. A PVC provides an abstraction layer to underlying storage. An administrator could create a number of static persistent volumes (PVs) that can later be bound to one or more persistent volume claims.
+
 
 == Exercise  
 
