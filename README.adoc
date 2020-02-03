@@ -38,7 +38,7 @@ This is a developer day workshop for OpenShift Container Platform
 * Deploy a serverless application <<future>>
 
 === DevOps
-* Code promotion across environments
+* <<17.CodePromotion.adoc#,Code promotion across environments>>
 * Creating a pipeline with Jenkins on OpenShift
 * Creating a lightweight pipeline with Tekton <<future>>
 * <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
