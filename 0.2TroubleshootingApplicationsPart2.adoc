@@ -1,0 +1,141 @@
+= Troubleshooting Applications Part 2
+
+== Prerequisites
+* You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
+* You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
+* Access to Code Ready workspaces 
+
+== Introduction
+Below are common application troubleshooting techniques to use while developing an application. We will perform different exercises to see how to resolve different issues that may come up while developing your application. 
+
+== Exercises
+=== Prepare Exercise 
+* Create new project
+```
+$ oc new-project troubleshooting-apps
+```
+
+
+=== Troubleshooting access to containers
+
+We will be discussing how to troubleshoot access to your pods and containers from external endpoints and internal endpoints.
+
+Troubleshooting OpenShift SDN
+
+link:https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[List of HTTP status codes]
+
+____
+1xx (Informational): The request was received, continuing process
+2xx (Successful): The request was successfully received, understood, and accepted
+3xx (Redirection): Further action needs to be taken in order to complete the request
+4xx (Client Error): The request contains bad syntax or cannot be fulfilled
+5xx (Server Error): The server failed to fulfill an apparently valid request
+____
+
+Deploy Sample nodejs application
+```
+$ oc new-app https://github.com/sclorg/nodejs-ex -l name=nodejs
+```
+
+Expose nodejs application
+```
+
+oc expose svc/nodejs-ex
+```
+
+Get the web external endpoint for the nodejs images
+```
+$ ENDPOINT=http://$(oc get route | grep "nodejs-ex" | awk '{print $2}')
+$ echo $ENDPOINT
+```
+
+Debugging External Access to an HTTP Service note the HTTP status is 200
+
+```
+$ curl -Iv  $ENDPOINT
+* About to connect() to nodejs-ex-troubleshooting-apps.apps.cluster-2acf.sandbox1535.opentlc.com port 80 (#0)
+*   Trying 3.134.196.54...
+* Connected to nodejs-ex-troubleshooting-apps.apps.cluster-2acf.sandbox1535.opentlc.com (3.134.196.54) port 80 (#0)
+> HEAD / HTTP/1.1
+> User-Agent: curl/7.29.0
+> Host: nodejs-ex-troubleshooting-apps.apps.cluster-2acf.sandbox1535.opentlc.com
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+< X-Powered-By: Express
+X-Powered-By: Express
+< Content-Type: text/html; charset=utf-8
+Content-Type: text/html; charset=utf-8
+< Content-Length: 40430
+Content-Length: 40430
+< ETag: W/"9dee-3nm2OJV/pDUlKWUTQSk1Z/pOG6E"
+ETag: W/"9dee-3nm2OJV/pDUlKWUTQSk1Z/pOG6E"
+< Date: Mon, 03 Feb 2020 21:19:46 GMT
+Date: Mon, 03 Feb 2020 21:19:46 GMT
+< Set-Cookie: 19c5b4cfc59cf5b1e636e779627e96e3=1d13da5a99ce1364aa9df33a04a5e83a; path=/; HttpOnly
+Set-Cookie: 19c5b4cfc59cf5b1e636e779627e96e3=1d13da5a99ce1364aa9df33a04a5e83a; path=/; HttpOnly
+< Cache-control: private
+Cache-control: private
+
+<
+* Connection #0 to host nodejs-ex-troubleshooting-apps.apps.cluster-2acf.sandbox1535.opentlc.com left intact
+```
+
+Other tests against External Endpoint
+
+Test that the DNS resolves to domain name
+```
+$ dig *.apps.cluster-2acf.sandbox1535.opentlc.com
+$ dig +short *.apps.cluster-2acf.sandbox1535.opentlc.com
+```
+
+Use the ip address ping to check if you can reach the router host.
+```
+$ ping -c 3 returned_ip
+```
+
+Use the telnet command to ensure that the port is open
+```
+$ telnet returned_ip 80
+```
+
+Get the web service endpoint for the nodejs application
+```
+$ SERVICE_ENDPOINT=http://$(oc get service | grep nodejs |  awk '{print $3}')
+$ echo $SERVICE_ENDPOINT
+```
+
+Test Service Endpoint 
+```
+curl -Iv $SERVICE_ENDPOINT
+```
+
+Use the ip address ping to check if you can reach the service endpoint.
+```
+$ ping -c 3 returned_ip
+```
+
+Use the telnet command to ensure that the port is open
+```
+$ telnet returned_ip 80
+```
+
+Delete deployment 
+```
+$ oc delete all --selector app=nodejs-ex`
+```
+
+=== Insufficient Cluster Resources
+
+=== Exceeding CPU/Memory Limits
+
+=== Resource Quotas
+
+== Summary
+
+.In this lab we learned how to troubleshoot the following 
+- Network access to containers
+- Insufficient Cluster Resources
+- Exceeding CPU/Memory Limits
+- Resource Quotas

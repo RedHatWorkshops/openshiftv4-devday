@@ -1,0 +1,254 @@
+= Using Persistent Storage
+
+== Prerequisites
+* You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
+* You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
+
+== Introduction
+With OpenShift files that live on the container instance are ephemeral. This means that once the pod is destroyed or reinstantiated any changes to the files or data storage on the container is destoryed.
+
+*PersistentVolume (PV)* is an API object, which represents a piece of existing storage in the cluster that was either statically provisioned by the cluster administrator or dynamically provisioned using a StorageClass object. It is a resource in the cluster just like a node is a cluster resource.
+
+=== Types of PVs
+
+.OpenShift Container Platform supports the following `PersistentVolume` plug-ins:
+- AWS Elastic Block Store (EBS)
+- Azure Disk
+- Azure File
+- Cinder
+- Fibre Channel
+- GCE Persistent Disk
+- HostPath
+- iSCSI
+- Local volume
+- NFS
+- Red Hat OpenShift Container Storage
+- VMware vSphere
+
+.Supported access modes for PVs
+[options="header,footer"]
+|=======================
+|Volume Plug-in|ReadWriteOnce   |ReadOnlyMany    |  ReadWriteMany
+|AWS EBS    |[*] | [ ] | [ ]
+|Azure File    |[*] | [ *] | [* ]
+|Azure Disk    |[*] | [ ] | [ ]
+|Cinder   |[*] | [ ] | [ ]
+|Fibre Channel  |[*] | [*] | [ ]
+|GCE Persistent Disk |[*] | [ ] | [ ]
+|HostPath  |[*] | [ ] | [ ]
+|iSCSI   |[*] | [*] | [ ]
+|Local volume  |[*] | [ ] | [ ]
+|NFS   | [*] | [*] | [*]
+| Red Hat OpenShift Container Storage| [*] | [ ] | [*]
+|vSphere    |[*] | [ ] | [ ]
+|=======================
+
+ 
+*PersistentVolumeClaim* is an API Object, which represents a request for storage by a developer. It is similar to a Pod in that Pods consume node resources and PVCs consume PV resources. A PVC provides an abstraction layer to underlying storage. An administrator could create a number of static persistent volumes (PVs) that can later be bound to one or more persistent volume claims.
+
+
+== Exercise  
+
+=== Prepare Exercise 
+* Create new project
+```
+$ oc new-project pvc-demo
+```
+
+=== Create a Persistent Volume Claim
+* Create a pv definition file.
+```
+cat >myclaim-pvc.yml<<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+  namespace: pvc-demo
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+```
+
+
+* Create the persistent volume claim.
+```
+oc create -f myclaim-pvc.yml
+```
+
+* Mount your pv to a pod by deploying sample app
+```
+cat >deploy-pvc.yml<<EOF
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: pv-deploy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mypv
+    spec:
+      containers:
+      - name: shell
+        image: centos:7
+        command:
+        - "bin/bash"
+        - "-c"
+        - "sleep 10000"
+        volumeMounts:
+        - name: mypd
+          mountPath: "/tmp/persistent"
+      volumes:
+      - name: mypd
+        persistentVolumeClaim:
+          claimName: myclaim
+EOF
+```
+
+* Deploy app 
+```
+$ oc create -f deploy-pvc.yml
+deployment.apps/pv-deploy created
+```
+
+
+* Get pod name
+```
+$ oc get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+pv-deploy-f8d4f87f6-mlspk   1/1     Running   0          2m26s
+```
+
+* Review pod configuration
+```
+$ oc describe pod pv-deploy-f8d4f87f6-mlspk
+Name:         pv-deploy-f8d4f87f6-mlspk
+Namespace:    pvc-demo
+Priority:     0
+Node:         ip-10-0-159-218.us-east-2.compute.internal/10.0.159.218
+Start Time:   Fri, 31 Jan 2020 17:22:18 +0000
+Labels:       app=mypv
+              pod-template-hash=f8d4f87f6
+Annotations:  k8s.v1.cni.cncf.io/networks-status:
+                [{
+                    "name": "openshift-sdn",
+                    "interface": "eth0",
+                    "ips": [
+                        "10.128.2.16"
+                    ],
+                    "dns": {},
+                    "default-route": [
+                        "10.128.2.1"
+                    ]
+                }]
+              openshift.io/scc: restricted
+Status:       Running
+IP:           10.128.2.16
+IPs:
+  IP:           10.128.2.16
+Controlled By:  ReplicaSet/pv-deploy-f8d4f87f6
+Containers:
+  shell:
+    Container ID:  cri-o://c3ec65f4b7af095310cf62e40dc35c0ddef021e968c63fc99ae13cf78b02fe5d
+    Image:         centos:7
+    Image ID:      docker.io/library/centos@sha256:285bc3161133ec01d8ca8680cd746eecbfdbc1faa6313bd863151c4b26d7e5a5
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      bin/bash
+      -c
+      sleep 10000
+    State:          Running
+      Started:      Fri, 31 Jan 2020 17:22:32 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /tmp/persistent from mypd (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-27rcv (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  mypd:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  myclaim
+    ReadOnly:   false
+  default-token-27rcv:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-27rcv
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason                  Age        From                                                 Message
+  ----    ------                  ----       ----                                                 -------
+  Normal  Scheduled               <unknown>  default-scheduler                                    Successfully assigned pvc-demo/pv-deploy-f8d4f87f6-mlspk to ip-10-0-159-218.us-east-2.compute.internal
+  Normal  SuccessfulAttachVolume  3m19s      attachdetach-controller                              AttachVolume.Attach succeeded for volume "pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7"
+  Normal  Pulled                  3m9s       kubelet, ip-10-0-159-218.us-east-2.compute.internal  Container image "centos:7" already present on machine
+  Normal  Created                 3m8s       kubelet, ip-10-0-159-218.us-east-2.compute.internal  Created container shell
+  Normal  Started                 3m8s       kubelet, ip-10-0-159-218.us-east-2.compute.internal  Started container shell
+```
+
+
+* test mount
+```
+$ oc exec -i -t  pv-deploy-f8d4f87f6-mlspk  /bin/bash
+bash-4.2$ df -h
+Filesystem                            Size  Used Avail Use% Mounted on
+overlay                               120G  6.5G  113G   6% /
+tmpfs                                  64M     0   64M   0% /dev
+tmpfs                                 3.9G     0  3.9G   0% /sys/fs/cgroup
+shm                                    64M     0   64M   0% /dev/shm
+tmpfs                                 3.9G  3.4M  3.9G   1% /etc/passwd
+/dev/xvdbv                            976M  2.6M  958M   1% /tmp/persistent
+/dev/mapper/coreos-luks-root-nocrypt  120G  6.5G  113G   6% /etc/hosts
+tmpfs                                 3.9G   24K  3.9G   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs                                 3.9G     0  3.9G   0% /proc/acpi
+tmpfs                                 3.9G     0  3.9G   0% /proc/scsi
+tmpfs                                 3.9G     0  3.9G   0% /sys/firmware
+bash-4.2$ cd /tmp/persistent
+bash-4.2$ touch testfile
+bash-4.2$ ls -lath
+total 20K
+drwxrwsr-x. 3 root       1000540000 4.0K Jan 31 17:28 .
+-rw-r--r--. 1 1000540000 1000540000    0 Jan 31 17:28 testfile
+drwxrwxrwt. 1 root       root         24 Jan 31 17:22 ..
+drwxrws---. 2 root       1000540000  16K Jan 31 17:22 lost+found
+bash-4.2$ exit
+exit
+```
+
+* Delete the deployment.
+```
+$ oc delete -f oc delete -f deploy-pvc.yml
+```
+
+* Delete the persistent volume claim.
+```
+$ oc get pvc
+NAME      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+myclaim   Bound    pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7   1Gi        RWO            gp2            10m
+
+$ oc delete pvc myclaim
+persistentvolumeclaim "myclaim" deleted
+```
+
+* Delete Project 
+```
+$ oc delete project  pvc-demo
+```
+
+== Summary
+In this lab learned about persistent volumes and persistent volume claims. We then created a persistent volume claim and deployed an application.
+
