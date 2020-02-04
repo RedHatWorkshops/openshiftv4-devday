@@ -203,7 +203,7 @@ Events:
 
 * test mount
 ```
- oc exec -i -t  pv-deploy-f8d4f87f6-mlspk  /bin/bash
+$ oc exec -i -t  pv-deploy-f8d4f87f6-mlspk  /bin/bash
 bash-4.2$ df -h
 Filesystem                            Size  Used Avail Use% Mounted on
 overlay                               120G  6.5G  113G   6% /
@@ -231,7 +231,7 @@ exit
 
 * Delete the deployment.
 ```
-oc delete -f oc delete -f deploy-pvc.yml
+$ oc delete -f oc delete -f deploy-pvc.yml
 ```
 
 * Delete the persistent volume claim.
@@ -242,6 +242,11 @@ myclaim   Bound    pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7   1Gi        RWO    
 
 $ oc delete pvc myclaim
 persistentvolumeclaim "myclaim" deleted
+```
+
+* Delete Project 
+```
+$ oc delete project  pvc-demo
 ```
 
 == Summary

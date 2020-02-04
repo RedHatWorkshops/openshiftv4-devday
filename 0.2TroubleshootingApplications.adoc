@@ -1,0 +1,385 @@
+= Troubleshooting Applications
+
+== Prerequisites
+* You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
+* You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
+
+== Introduction
+Below are common application troubleshooting techniques to use while developing an application. We will perform different exercises to see how to resolve different issues that may come up while developing your application. 
+
+== Exercises
+=== Prepare Exercise 
+* Create new project
+```
+$ oc new-project troubleshooting-apps
+```
+
+
+=== Image Pull Failures
+
+.Things to consider.. Why did the container fail to pull
+- Image tags is incorrect
+- Images doesn’t exist (or is in a different registry)
+- Kubernetes doesn’t have permissions to pull that image
+
+*Create image that fails pull*
+```
+$ oc  run fail --image=tcij1013/dne:v1.0.0
+```
+
+*Check the status of the image*
+```
+oc get pods
+NAME            READY   STATUS             RESTARTS   AGE
+fail-1-8tn7v    0/1     ImagePullBackOff   0          26s
+fail-1-deploy   1/1     Running            0          35s
+```
+
+*Inspect the pod*
+```
+$ oc describe pod fail-1-8tn7v
+```
+
+*As we can see the pod failed because it could not pull down the image.*
+```
+Controlled By:  ReplicationController/fail-1
+Containers:
+  fail:
+    Container ID:
+    Image:          tcij1013/dne:v1.0.0
+    Image ID:
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ImagePullBackOff
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
+```
+
+
+*Delete the deployment*
+```
+$ oc delete dc/fail
+deploymentconfig.apps.openshift.io "fail" deleted
+```
+
+=== Application Crashing
+*Create a new app called crashing-app*
+```
+$ oc new-app tcij1013/crashing-app:latest
+```
+
+*View pods status to see that the container is in a CrashLoopBackOff*
+```
+$  oc get pods
+NAME                    READY   STATUS             RESTARTS   AGE
+crashing-app-1-deploy   0/1     Completed          0          35s
+crashing-app-1-rsrl2    0/1     CrashLoopBackOff   1          27s
+```
+
+*Review the pod status by running the oc describe command as seen below and look for the Reason under the State property.*
+```
+$ oc describe pod  crashing-app-1-rsrl2
+Containers:
+  crashing-app:
+    Container ID:   cri-o://c228be864eade41a7693717af9320503103a704a255e8da241fa1bf5cbfac710
+    Image:          tcij1013/crashing-app@sha256:5f7a1a3425f3e8eeaa5b0be0f3948ee6cf5380f75d95f0c96e549e91cf98db1d
+    Image ID:       docker.io/tcij1013/crashing-app@sha256:5f7a1a3425f3e8eeaa5b0be0f3948ee6cf5380f75d95f0c96e549e91cf98db1d
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Mon, 03 Feb 2020 13:34:56 +0000
+      Finished:     Mon, 03 Feb 2020 13:34:58 +0000
+    Ready:          False
+    Restart Count:  3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
+```
+
+*View crashes from Events tab in UI*  
+
+image::images/crashing-app-1-rsrl2.png[]
+
+*Delete deployment*
+
+```
+$ oc delete dc/crashing-app
+```
+
+=== Invalid ConfigMap or Secret
+*Create one bad configmap yaml file*
+```
+$ cat >bad-configmap-pod.yml<<YAML
+# bad-configmap-pod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: SPECIAL_LEVEL_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: special-config
+              key: special.how
+YAML
+```
+
+*Create the bad configmap pod deployment*
+```
+$ oc create -f bad-configmap-pod.yml
+```
+
+*When we are getting the status of the pod we see that we have a `CreateContainerConfigError`*
+```
+$ oc get pods
+NAME            READY   STATUS                       RESTARTS   AGE
+configmap-pod   0/1     CreateContainerConfigError   0          31s
+```
+
+*When we run the `oc describe` command we see under State and reason the same error message.*
+```
+$ oc describe pod configmap-pod
+Containers:
+  test-container:
+    Container ID:
+    Image:         gcr.io/google_containers/busybox
+    Image ID:
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/sh
+      -c
+      env
+    State:          Waiting
+      Reason:       CreateContainerConfigError
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      SPECIAL_LEVEL_KEY:  <set to the key 'special.how' of config map 'special-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
+```
+
+*Delete the bad configmap deployment*
+```
+$ oc delete -f bad-configmap-pod.yml
+```
+
+*Create a bad secret yaml file*
+```
+$ cat >bad-secret-pod.yml<<YAML
+# bad-secret-pod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-pod
+spec:
+  containers:
+    - name: test-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      volumeMounts:
+        - mountPath: /etc/secret/
+          name: myothersecret
+  restartPolicy: Never
+  volumes:
+    - name: myothersecret
+      secret:
+        secretName: myothersecret
+YAML
+```
+
+*Create the bad secret deployment*
+```
+$ oc create -f bad-secret-pod.yml
+```
+
+*Retrieve the pod status*
+```
+$ oc get pods
+NAME         READY   STATUS              RESTARTS   AGE
+secret-pod   0/1     ContainerCreating   0          37s
+```
+
+*Check the reason for pod failure the mount failed and timed out.*
+```
+$ oc describe pod secret-pod
+Events:
+  Type     Reason       Age                From                                                 Message
+  ----     ------       ----               ----                                                 -------
+  Normal   Scheduled    <unknown>          default-scheduler                                    Successfully assigned troubleshooting-apps/secret-pod to ip-10-0-159-218.us-east-2.compute.internal
+  Warning  FailedMount  25s (x8 over 88s)  kubelet, ip-10-0-159-218.us-east-2.compute.internal  MountVolume.SetUp failed for volume "myothersecret" : secret "myothersecret" not found
+```
+
+*Delete the bad secret deployment*
+```
+$ oc delete -f bad-secret-pod.yml
+```
+
+=== Liveness/Readiness Probe Failure
+.Things to consider.. Why did it fail?
+- The Probes are incorrect - Check the health URL?
+- The probes are too sensitive - Does that application take a while for it to start or respond?
+- The application is no longer responding correctly to the Probe - Could the database be misconfigured.
+
+Deploy nodejs app 
+```
+$ oc new-app https://github.com/sclorg/nodejs-ex -l name=nodejs
+```
+
+Provide a bad health configuration to OpenShift
+```
+$ oc set probe dc/nodejs-ex --liveness --readiness --initial-delay-seconds=30 --failure-threshold=3 --get-url=http://:8080/healthz
+```
+
+Use `oc events` to view the health status.
+```
+$ oc get events
+35s         Normal    Created             pod/nodejs-ex-1-dr2wr                  Created container nodejs-ex
+35s         Normal    Started             pod/nodejs-ex-1-dr2wr                  Started container nodejs-ex
+36s         Warning   Unhealthy           pod/nodejs-ex-1-dr2wr                  Liveness probe failed: HTTP probe failed with statuscode: 404
+2s          Warning   Unhealthy           pod/nodejs-ex-1-dr2wr                  Readiness probe failed: HTTP probe failed with statuscode: 404
+36s         Normal    Killing             pod/nodejs-ex-1-dr2wr                  Container nodejs-ex failed liveness probe, will be restarted
+```
+
+View health check from Events tab in UI
+
+image::images/nodejs-ex-1-dr2wr.png[]
+
+Delete Deployment
+```
+$ oc delete all --selector app=nodejs-ex
+```
+
+=== Validation Errors
+Lets validate a sample nginx app 
+```
+$ cat >validate-deployment.yaml<<EOF
+apiVersion: apps/vl
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+EOF
+```
+
+Run the oc apply command with --dry-run --validate=true flags
+```
+$ oc apply -f validate-deployment.yaml --dry-run --validate=true
+error: unable to recognize "validate-deployment.yaml": no matches for kind "Deployment" in version "apps/vl"rue
+```
+
+Add two extra spaces to annotations under metadata in the validate-deployment.yaml
+```
+$  cat validate-deployment.yaml
+apiVersion: apps/vl
+kind: Deployment
+  metadata:
+  name: nginx-deployment
+```
+
+Check for any spacing  error using the python -c command
+```
+$  python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' <  validate-deployment.yaml
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib64/python2.7/site-packages/yaml/__init__.py", line 93, in safe_load
+    return load(stream, SafeLoader)
+  File "/usr/lib64/python2.7/site-packages/yaml/__init__.py", line 71, in load
+    return loader.get_single_data()
+  File "/usr/lib64/python2.7/site-packages/yaml/constructor.py", line 37, in get_single_data
+    node = self.get_single_node()
+  File "/usr/lib64/python2.7/site-packages/yaml/composer.py", line 36, in get_single_node
+    document = self.compose_document()
+  File "/usr/lib64/python2.7/site-packages/yaml/composer.py", line 55, in compose_document
+    node = self.compose_node(None, None)
+  File "/usr/lib64/python2.7/site-packages/yaml/composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "/usr/lib64/python2.7/site-packages/yaml/composer.py", line 127, in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+  File "/usr/lib64/python2.7/site-packages/yaml/parser.py", line 98, in check_event
+    self.current_event = self.state()
+  File "/usr/lib64/python2.7/site-packages/yaml/parser.py", line 428, in parse_block_mapping_key
+    if self.check_token(KeyToken):
+  File "/usr/lib64/python2.7/site-packages/yaml/scanner.py", line 116, in check_token
+    self.fetch_more_tokens()
+  File "/usr/lib64/python2.7/site-packages/yaml/scanner.py", line 220, in fetch_more_tokens
+    return self.fetch_value()
+  File "/usr/lib64/python2.7/site-packages/yaml/scanner.py", line 580, in fetch_value
+    self.get_mark())
+yaml.scanner.ScannerError: mapping values are not allowed here
+  in "<stdin>", line 3, column 11
+```
+
+Change apiVersion back to v1 and correct spacing 
+```
+$ cat validate-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+  metadata:
+  name: nginx-deployment
+```
+
+Validate YAML 
+```
+$ python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' <  validate-deployment.yaml
+$ oc apply -f validate-deployment.yaml --dry-run --validate=true
+deployment.apps/nginx-deployment created (dry run)
+```
+
+=== Container not updating
+An example of a container not updating can be due to the following scenario
+
+.Creating a deployment using an image tag (e.g. tcij1013/myapp:v1)  
+- Notice there is a bug in myapp  
+- Build a new image and push the to the same tag (tcij1013/myapp:v1)
+- Delete all the myapp Pods, and watch the new ones get created by the deployment
+- Realize that the bug is still present
+- This problem relates to how Kubernetes decide weather to go do a docker pull when starting a container in a Pod.
+
+In the V1.Container specification there's an option call `ImagePullPolicy`:
+____
+Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
+____
+
+Since the image is tagged as v1 in the above example the default pull policy is IfNotPresent. The OpenShift cluster already has a local copy of tcij1013/myapp:v1, so it does not attempt to do a docker pull. When the new Pods come up, there still using thee old broken container image.
+
+.Ways to resolve this issue
+- Use unique tags (e.g. based on your source control commit id)
+- Specify ImagePullPolicy: Always in your deployment.
+
+== Summary
+.In this lab we learned how to troubleshoot the following 
+- Image Pull Failures
+- Application Crashing
+- Invalid ConfigMap or Secrets
+- Liveness/Readiness Probe Failure
+- Validation Errors
+- Container not updating
