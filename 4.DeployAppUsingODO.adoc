@@ -1,0 +1,208 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+:imagesdir: ./images
+
+
+= Deploy an Application Using odo
+
+== Prerequisites
+* Access to an OpenShift Cluster and a Web Console URL from your workshop coordinator
+* You need API URL to the cluster. Ask your workshop coordinator, if you don't have one
+* You need credentials (UserName and Password) to login to the cluster
+* You need to have odo on your machine 
+
+== **Introduction**
+
+Through the exercises presented here, you’ll see how to deploy a three-tier Node.js application on Red Hat OpenShift. The example application is a concession kiosk, used to streamline the process of placing concession orders. The user will place an order via the Front-End web application. The order information will be saved in a MongoDB database, and then the user will be given an order number. Once their order number is called, users can go to the concession window to pay and receive their food.
+
+image::odo1.png[]
+
+== Deploy the Back-End nodejs app on OpenShift
+
+* Create a folder to store Back-End and Front-End code 
+
+```
+mkdir kiosk
+cd kiosk
+```
+
+* you need to get the code from github:
+
+```
+git clone https://github.com/RedHatWorkshops/openshiftv4-odo-workshop-backend.git
+cd openshiftv4-odo-workshop-backend/
+```
+
+* Use odo to build and deploy Back-End to Openshift
+
+```
+odo login <ocp server API uri> -u <user> -p <password>
+odo project create kiosk
+odo create nodejs backend
+odo push
+```
+
+[teal]#Output:#
+
+image::odo2.png[]
+
+
+
+NOTE: Check the log and make sure the app started correctly
+
+```
+
+  odo log backend
+  
+```
+
+image::odo3.png[]
+
+```
+
+
+
+```
+
+NOTE: If you login to Openshift 4.2 you should see your deployment on the developers view:
+
+image::odo4.png[]
+
+
+
+== **Deploy the Front-End nodejs app on OpenShift**
+
+NOTE: Make sure you are in the **kiosk** folder that you created on step one before moving forward.
+
+* Get code from github
+```
+git clone https://github.com/RedHatWorkshops/openshiftv4-odo-workshop.git
+cd openshiftv4-odo-workshop/
+```
+
+* Use odo to build and deploy Front-End to Openshift
+
+```
+odo create nodejs frontend
+odo push
+```
+
+[teal]#Output:#
+
+
+image::odo5.png[]
+
+NOTE: Validate that the Front-End app is started. 
+```
+
+  odo log frontend
+  
+```
+
+As the Front-End app needs to be accessed by client outside of the openshift we need to create a **URL** for it, this is done with the following commands:
+
+```
+odo url create
+odo push
+```
+
+get the **URL** you just created with following command and access it on your browser. you should see this image:
+
+```
+odo url list
+```
+
+image::odo6.png[]
+
+
+=== Link Front-End to Back-End application
+
+Now that we have both Front-End and Back-End deployed we need to make sure that the Front-End app would use the Back-End as a service to fulfill the request.
+This is easily done by the [green]*odo link* command as below:
+```
+cd <frontend folder location>
+odo link backend
+```
+Let us test the application, go to the Front-End app in your browser and order something.
+you shouled see this responce:
+
+image::odo7.png[700,700]
+
+as you can see the order number is 9999 and you can not see your items this is because the Back-End app need a database to store the orders which we have not deployed yet. as long as we are in a roll let's do it!
+
+== Create an ephemeral mongodb 
+
+* To create a mongodb we can use the following command :
+```
+odo service create
+``` 
+this command will show a list of available services provided by openshift out of the box. lets pick database and select mongodb-ephemeral
+you can accept the rest of the default values.
+
+image::odo8.png[]
+image::odo9.png[]
+
+NOTE: if you do not want to step through this process just run the following command
+```
+
+odo service create mongodb-ephemeral mongodb-ephemeral --plan default -p DATABASE_SERVICE_NAME=mongodb -p MEMORY_LIMIT=512Mi -p MONGODB_DATABASE=sampledb -p MONGODB_VERSION=3.6
+
+```
+image::odo10.png[]
+
+=== Link Back-End to MongoDB 
+
+We are almost done, now that we have a database we just need to link it to the Back-End application.
+If you accept the default values the name of your service for the MongoDB should be **mongodb-ephemeral** and you can use the followin command to link them together.
+```
+cd <backend app code location>
+odo link mongodb-ephemeral
+
+or if you are in the Front-End code folder do this
+
+odo link mongodb-ephemeral --component backend
+
+```
+you should see an output similar to this:
+
+image::odo11.png[700,700]
+
+after linking database to Back-End, the odo is adding some extra environment variable to your pod and would restart the pod so the aplication could utilize them and connect to the database.
+
+NOTE: you can explore this in index.js file in your Back-End folder:
+const dbConnectionUrl = process.env.MONGODB_URL || 'mongodb://' + process.env.username +':'+ process.env.password+'@mongodb/' +process.env.database_name;
+
+Let's try ordering again, this time you see your order recorder and get an order number.
+
+image::odo12.png[]
+
+
+We are not completely done just stay with me for a couple more minutes.Let's say you build this app and demo it to your manager and they like everything but siad that  Front-End looks too cartoonish and want you to change that.I have prepared another set that for the sake of time you can use and see what it would take to change the app and redeploy as this is a normal part of our life as a developer, code, deploy, validate, and start over.
+
+Do the following to use the new set of images.
+```
+cd <frontend app code location>
+mv public/images public/images-2
+mv public/images-1 public/images
+mv public/stylesheets/style.css public/stylesheets/style-2.css
+mv public/stylesheets/style-1.css public/stylesheets/style.css
+```
+Now that we have change the assets let's redeploy the code:
+
+```
+odo push
+```
+Let's try ordering again, this time you see your new images in Front-End app.
+
+image::odo13.png[]
+image::odo14.png[]
+
+Now the BOSS is happy, but we know that is not true and he/she ask you to change it again! but now you know, after any code change you just need to say/type the magic word [green]** odo push**
+
+Thanks to Jan Kleinert for original development 
+link:https://developers.redhat.com/articles/deploy-a-NodeJS-app-OpenShift/[deploy-a-NodeJS-app-OpenShift]

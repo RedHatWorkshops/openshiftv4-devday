@@ -10,7 +10,8 @@ This is a developer day workshop for OpenShift Container Platform
 
 == Table of Contents
 
-* Setting up client tools
+=== Preparation
+* <<0-SettingUpClientTools.adoc#, Setting up client tools>>
 
 === Using OpenShift Developer Console
 * <<1.ExploreDeveloperConsole.adoc#, Explore OpenShift Developer Web Console>>
@@ -18,7 +19,7 @@ This is a developer day workshop for OpenShift Container Platform
 
 === Using Command line tools
 * <<3.DeployAppUsingOC.adoc#, Deploy an application using `oc` CLI>>
-* Using `odo` CLI
+* <<4.DeployAppUsingODO.adoc#, Deploy an application using `odo` CLI>>
 
 === Using an IDE
 * Using CodeReady Workspaces build containerized application in a container
@@ -27,7 +28,7 @@ This is a developer day workshop for OpenShift Container Platform
 === Running Applications on OpenShift Cluster
 * Deploy a multi-tiered application
 * <<8.ApplicationScaling.adoc#,Scaling Application Instances>>
-* <<9.DeployBinaryArtifacts.adoc#,Deploying binaries artifacts>>
+* <<9.DeployBinaryArtifacts.adoc#,Deploying binary artifacts>>
 * Configuring health probes
 * Using web-hooks for build automation
 * Rollback deployments
@@ -37,11 +38,11 @@ This is a developer day workshop for OpenShift Container Platform
 * Deploy a serverless application <<future>>
 
 === DevOps
-* Code promotion across environments
+* <<17.CodePromotion.adoc#,Code promotion across environments>>
 * Creating a pipeline with Jenkins on OpenShift
 * Creating a lightweight pipeline with Tekton <<future>>
-* Blue Green Deployments
-* AB Testing
+* <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
+* <<21.ABTesting.adoc#,AB Testing>>
 
 === Troubleshooting
 * Troubleshoot application failures

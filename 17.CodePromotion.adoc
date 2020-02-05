@@ -1,0 +1,170 @@
+= Code Promotion across Environments
+
+== Introduction
+
+In this lab we will learn how an application image binary can be promoted across the environments. As an example we will use development and QA environments as promotion to pre-prod and production will be very similar.
+
+In this example we are using projects as means of separation of environments (development, qa, production).
+
+== Create and Setup Environments for Code Promotion
+
+* Create two projects (Development and Testing)
+
+Using the knowledge you gained from the past create two projects. Name the first project *development-UserName*
+
+....
+$ oc new-project development-UserName
+....
+
+Name the second *testing-UserName*.
+....
+$ oc new-project testing-UserName
+....
+
+*Remember* to substitute the username!
+
+* Provide ImagePuller Access to the QA Project from Development Project
+
+The following command will allow the QA project to be able to pull the container images from the Development project.
+
+....
+$ oc policy add-role-to-group system:image-puller system:serviceaccounts:testing-UserName -n development-UserName
+....
+
+== Deploy application
+
+
+* Create an application in the development project
+
+Switch over to the *development-UserName* project and deploy an application using the `php` s2i builder. You can use web console or
+command line. The command line option is shown below.
+
+*Bonus points:* Clone this application to your own github account and deploy it so that you can redeploy with changes later.
+
+....
+oc project development-UserName
+oc new-app openshift/php~https://github.com/RedHatWorkshops/welcome-php
+....
+
+* Tag the Container Image
+
+Wait until the application gets built and deployed. Now if you check the imagestreams you will find the container image for this application.
+
+**Note** You can find the imagestream name using the following command. `is` is the
+short form for `imageStream`.
+
+....
+$ oc get is                                                                            
+NAME          IMAGE REPOSITORY                                                                 TAGS     UPDA
+TED                                                                                                         
+welcome-php   image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php   latest   12 s
+econds ago
+....
+
+Now describe this imagestream. It will show you full image id and the current tags assigned to that image. You'll notice that only `latest` is assigned right now.
+
+....
+$ oc get is                                                                            
+NAME          IMAGE REPOSITORY                                                                 TAGS     UPDA
+TED                                                                                                         
+welcome-php   image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php   latest   Abou
+t a minute ago                                                                                              
+[user2@cli-2-b2pms ~]$ oc describe is welcome-php                                                           
+Name:                   welcome-php                                                                         
+Namespace:              development-user1                                                                   
+Created:                2 minutes ago                                                                       
+Labels:                 app=welcome-php                                                                     
+                        app.kubernetes.io/component=welcome-php                                             
+                        app.kubernetes.io/instance=welcome-php                                              
+Annotations:            openshift.io/generated-by=OpenShiftNewApp                                           
+Image Repository:       image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php      
+Image Lookup:           local=false                                                                         
+Unique Images:          1                                                                                   
+Tags:                   1                                                                                   
+                                                                                                            
+latest                                                                                                      
+  no spec tag                                                                                               
+                                                                                                            
+  * image-registry.openshift-image-registry.svc:5000/development-UserName/welcome-php@sha256:ba7dd4e757e2b20851
+e7becc5fd2c2b38e1ee15165f2777fdc1c46ebd43c80a4
+....
+
+In general, when you are in development, you may be building your application multiple times,and test it. When a particular image passes your tests it will be promoted to QA.
+
+Now let us assume that this container image is good and is ready to promote to QA. Let us tag this image using the `oc tag` command. We will pick up the latest image built and tested and add a tag to it as `promote-qa` as shown below:
+
+*Remember* to substitute your UserName.
+
+....
+oc tag development-UserName/welcome-php:latest development-UserName/welcome-php:promote-qa
+
+Tag welcome-php:promote-qa set to development-user1/welcome-php@sha256:ba7dd4e757e2b20851e7becc5fd2c2b38e1ee
+15165f2777fdc1c46ebd43c80a4.
+....
+
+Check the following commands and replace the values of **UserName** where needed:
+
+....
+$ oc tag image-registry.openshift-image-registry.svc:5000/development-UserName/welcome-php
+@sha256:99fd4920719fc8e7e9d4ff1c4e9a87b22ca802fdce006901a0cdd19fb9f2e14c development-UserName/welcome-php:promote-qa
+
+Tag welcome-php:promote-qa set to image-registry.openshift-image-registry.svc:5000/development-UserName/welcome
+-php@sha256:99fd4920719fc8e7e9d4ff1c4e9a87b22ca802fdce006901a0cdd19fb9f2e14c
+....
+
+
+Now describe the imagestream again to notice that a new tag `promote-qa` is applied now.
+
+....
+$ oc describe is welcome-php                                                           
+Name:                   welcome-php                                                                         
+Namespace:              development-user1                                                                   
+Created:                19 minutes ago                                                                      
+Labels:                 app=welcome-php                                                                     
+                        app.kubernetes.io/component=welcome-php                                             
+                        app.kubernetes.io/instance=welcome-php                                              
+Annotations:            openshift.io/generated-by=OpenShiftNewApp                                           
+Image Repository:       image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php      
+Image Lookup:           local=false                                                                         
+Unique Images:          1                                                                                   
+Tags:                   2                                                                                   
+                                                                                                            
+latest                                                                                                      
+  no spec tag                                                                                               
+                                                                                                            
+  * image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php@sha256:ba7dd4e757e2b20851
+e7becc5fd2c2b38e1ee15165f2777fdc1c46ebd43c80a4                                                              
+      18 minutes ago                                                                                        
+                                                                                                            
+promote-qa                                                                                                  
+  tagged from welcome-php@sha256:ba7dd4e757e2b20851e7becc5fd2c2b38e1ee15165f2777fdc1c46ebd43c80a4           
+                                                                                                            
+  * image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php@sha256:ba7dd4e757e2b20851
+e7becc5fd2c2b38e1ee15165f2777fdc1c46ebd43c80a4                                                              
+      About a minute ago                      
+....
+
+*Step 5: Deploy the application to QA*
+
+Now you can switch over to the QA project and deploy the container image that we tagged as `promote-qa`. Note that the image is still in the development project. You are able to deploy that into testing project, because we gave necessary permissions for the testing project to be able to pull an image from development project.
+
+Also expose service to create route for this project and *remember* to substitute username.
+
+....
+oc project testing-UserName
+oc new-app development-UserName/welcome-php:promote-qa
+oc expose service welcome-php
+....
+
+Test this application in the QA project. Note that we deployed the container image (`development-UserName/welcome-php:promote-qa`) from the development project without rebuilding the code.
+
+*Bonus points*: Make changes to your git repo (to `index.php`) and deploy it to development first. Notice that your changes are seen only in development project. Repeat the changes a couple of times. Now find the `latest` imagestream and tag it as `promote-qa`. Watch out that the QA project gets redeployed when you
+update the new tag.
+
+Watch this
+https://blog.openshift.com/promoting-applications-across-environments[video] for complete understanding.
+
+
+== Summary
+
+You now know how to promote your application across environments in OpenShift.
