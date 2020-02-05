@@ -45,6 +45,6 @@ This is a developer day workshop for OpenShift Container Platform
 * <<21.ABTesting.adoc#,AB Testing>>
 
 === Troubleshooting
-* <<24.TroubleshootingApplications.adoc#,Troubleshoot application failures>
+* <<24.TroubleshootingApplications.adoc#,Troubleshoot application failures>>
 * Using Kibana to analyze application logs
 * Monitoring application metrics
