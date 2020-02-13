@@ -1,0 +1,199 @@
+
+= Deploy Multi-tiered Application
+
+== Introduction
+In this lab we will learn to deploy a multi-tiered application on OpenShift. This will be a typical three tier application with database, backend component and a frontend component.
+
+== Deploy a Database
+
+Create a new project 
+
+CAUTION:  Substitute UserName with your value below
+
+....
+oc new-project multitier-UserName
+....
+
+We will use MongoDB. You can deploy MongoDB using command line as follows:
+
+----
+oc new-app mongodb-ephemeral \ # <1>
+-l app.openshift.io/runtime=mongodb, \ # <2>
+app.kubernetes.io/part-of=multi-tiered-app # <3>
+----
+<1> create the database
+<2> label to display runtime icon on webconsole
+<3> displays the deployment as part of an application grouping called `multi-tiered-app` on web console
+
+
+Or you can also use WebConsole and select `Mongodb Ephemeral` from the developer catalog
+
+image::images/multitiered1.png[image]
+
+This will deploy the database and also create a secret that has credentials to connect to the database. Note the name of that secret as we will be using that with our backend application to connect to the database.
+
+----
+
+..
+..
+..
+--> Creating resources with label app.kubernetes.io/part-of=multi-tiered-app,app.openshift.io/runtime=mongodb ...
+    secret "mongodb" created # <1>
+    service "mongodb" created # <2>
+    deploymentconfig.apps.openshift.io "mongodb" created # <3>
+--> Success
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/mongodb' 
+    Run 'oc status' to view your app.
+----
+<1> this is the database secret that we will inject into our backend app later
+<2> this is the database service
+<3> this is the deploymentconfig
+
+
+== Deploy Backend Application
+
+Now we will deploy the backend application by running the following commands. The first command deploys the application and the second one applies an annotation to visually show connection to the database on the web console. 
+
+[NOTE]
+You can deploy this from web console by browsing through the the catalog and supplying the source code URL as input and selecting the runtime.
+
+....
+
+oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop-backend.git \ 
+--name=kiosk-backend \
+-l app.openshift.io/runtime=nodejs,\
+app.kubernetes.io/part-of=multi-tiered-app 
+
+oc annotate dc/kiosk-backend app.openshift.io/connects-to=mongodb
+....
+
+This will start openshift S2I build for your backend application. The build will run  for a few mins. 
+
+....
+..
+..
+--> Creating resources with label app.kubernetes.io/part-of=multi-tiered-app,app.openshift.io/runtime=nodejs ...
+    imagestream.image.openshift.io "kiosk-backend" created
+    buildconfig.build.openshift.io "kiosk-backend" created
+    deploymentconfig.apps.openshift.io "kiosk-backend" created
+    service "kiosk-backend" created
+--> Success
+    Build scheduled, use 'oc logs -f bc/kiosk-backend' to track its progress.
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose svc/kiosk-backend' 
+    Run 'oc status' to view your app.
+....
+
+You can watch build logs either using web console or via command line `oc logs build/kiosk-backend-1`
+
+
+In the meanwhile, we will patch the deployment configuration to add environment variables that reference the database secret. This is required for your backend application to make a service connection to the database.
+
+....
+oc patch dc/kiosk-backend --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env", "value": [ { "name": "username", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-user" }  } }, { "name": "password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-password" }  } }, { "name": "database_name", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-name" }  } }, { "name": "admin_password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-admin-password" }  } } ] }]'
+....
+
+The above creates the following secret mappings and assigns respective values from the secrets to environment variables. The environment variables will be already set when your container comes up in the pod.
+
+[cols=2*, options=header]
+|===
+|env variable
+|key from secret
+
+|username
+|database-user
+
+|password
+|database-password
+
+|database_name
+|database-name
+
+|admin_password
+|database-admin-password
+|===
+
+
+
+== Deploy Frontend
+
+Let us now deploy the frontend component. While creating the frontend we will also link this to the backend component that we deployed in the last step by passing the environment variables that point to the backend service.
+
+[NOTE]
+You can deploy this from web console by browsing through the the catalog and supplying the source code URL as input and selecting the runtime.
+....
+
+oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop.git \
+--name=kiosk-frontend \
+-l app.openshift.io/runtime=nodejs,\
+app.kubernetes.io/part-of=multi-tiered-app \
+-e COMPONENT_BACKEND_HOST=$(oc get svc kiosk-backend --template={{.spec.clusterIP}}) \
+-e COMPONENT_BACKEND_PORT=$(oc get svc kiosk-backend  -o=jsonpath='{ .spec.ports[?(@.name == "8080-tcp")].targetPort }')
+
+oc annotate dc/kiosk-frontend app.openshift.io/connects-to=kiosk-backend
+....
+
+Create a route to expose your frontend component via openshift router.
+
+....
+oc expose svc kiosk-frontend
+....
+
+[NOTE] 
+We did not expose our backend application to create an openshift route. This is because it would be accessed only within the openshift cluster. So, you would only want to expose those services that need to be accessed from outside the cluster.
+
+== Test App
+Now test the application by accessing its URL. You can get the URL by running 
+
+....
+oc get route kiosk-frontend --template={{.spec.host}}
+....
+
+Test in the browser, you will see this screen
+
+image::images/multitiered2.png[image]
+
+Place and order and confirm that you are getting an order number with order details:
+
+image::images/multitiered2.png[image]
+
+== Clean up
+Run these commands to clean up your multi-tiered application. 
+
+* Delete frontend component:
+
+----
+oc delete all -l app=kiosk-frontend
+----
+
+* Delete backend component
+----
+oc delete all -l app=kiosk-backend 
+----
+
+* Delete  database component
+----
+oc delete all -l app=mongodb   
+----
+
+* Delete database secret
+----
+oc delete secret mongodb
+----
+
+* Delete project/namespace
+
+CAUTION: Substitute UserName before running the command
+
+----
+oc delete project multitiered-UserName
+----
+
+
+
+
+
+
+
+
