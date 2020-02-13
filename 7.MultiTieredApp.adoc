@@ -24,18 +24,19 @@ oc new-project multitier-UserName
 We will use MongoDB. You can deploy MongoDB using command line as follows:
 
 ----
-oc new-app mongodb-ephemeral \  # <1>
--l app.openshift.io/runtime=mongodb,\  # <2>
-app.kubernetes.io/part-of=multi-tiered-app # <3>
+oc new-app mongodb-ephemeral \
+-l app.openshift.io/runtime=mongodb,\
+app.kubernetes.io/part-of=multi-tiered-app
 ----
-<1> create the database
-<2> label to display runtime icon on webconsole
-<3> displays the deployment as part of an application grouping called `multi-tiered-app` on web console
+
+* `app.openshift.io/runtime=mongodb` is a label to display runtime icon on webconsole
+
+* `app.kubernetes.io/part-of=multi-tiered-app` displays the deployment as part of an application grouping called `multi-tiered-app` on web console
 
 
 Or you can also use WebConsole and select `Mongodb Ephemeral` from the developer catalog
 
-image::images/multitiered1.png[image,500,300]
+image::images/multitiered1.png[image,1000]
 
 This will deploy the database and also create a secret that has credentials to connect to the database. Note the name of that secret as we will be using that with our backend application to connect to the database.
 
@@ -67,18 +68,17 @@ You can deploy this from web console by browsing through the the catalog and sup
 
 ....
 
-oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop-backend.git \ #<1> 
---name=kiosk-backend \ #<2>
--l app.openshift.io/runtime=nodejs,\ #<3>
-app.kubernetes.io/part-of=multi-tiered-app #<4> 
+oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop-backend.git \
+--name=kiosk-backend \
+-l app.openshift.io/runtime=nodejs,\
+app.kubernetes.io/part-of=multi-tiered-app
 
-oc annotate dc/kiosk-backend app.openshift.io/connects-to=mongodb #<5>
+oc annotate dc/kiosk-backend app.openshift.io/connects-to=mongodb
 ....
-<1> create an app from a git repo
-<2> application name
-<3> runtime label to display icon on web console
-<4> label to make app part-of application group
-<5> annotate to display connectivity between backend and database
+
+* `app.openshift.io/runtime=nodejs` is a runtime label to display icon on web console
+* `app.kubernetes.io/part-of=multi-tiered-app` is a label to make app part-of application group
+* `app.openshift.io/connects-to=mongodb` is an annotation to display connectivity between backend and database
 
 
 This will start openshift S2I build for your backend application. The build will run  for a few mins. 
@@ -104,11 +104,7 @@ You can watch build logs either using web console or via command line `oc logs b
 In the meanwhile, we will patch the deployment configuration to add environment variables that reference the database secret. This is required for your backend application to make a service connection to the database.
 
 ....
-oc patch dc/kiosk-backend --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env",\
- "value": [ { "name": "username", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-user" }  } },\
-  { "name": "password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-password" }  } },\
-   { "name": "database_name", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-name" }  } },\
-    { "name": "admin_password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-admin-password" }  } } ] }]'
+oc patch dc/kiosk-backend --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env", "value": [ { "name": "username", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-user" }  } },{ "name": "password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-password" }  } },{ "name": "database_name", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-name" }  } },{ "name": "admin_password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-admin-password" }  } } ] }]'
 ....
 
 The above creates the following secret mappings and assigns respective values from the secrets to environment variables. The environment variables will be already set when your container comes up in the pod.
@@ -145,13 +141,14 @@ oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop.git \
 --name=kiosk-frontend \
 -l app.openshift.io/runtime=nodejs,\
 app.kubernetes.io/part-of=multi-tiered-app \
--e COMPONENT_BACKEND_HOST=$(`oc get svc kiosk-backend --template={{.spec.clusterIP}})` \ #<1>
--e COMPONENT_BACKEND_PORT=$(oc get svc kiosk-backend  -o=jsonpath='{ .spec.ports[?(@.name == "8080-tcp")].targetPort }') #<2>
+-e COMPONENT_BACKEND_HOST=$(`oc get svc kiosk-backend --template={{.spec.clusterIP}})` \
+-e COMPONENT_BACKEND_PORT=$(oc get svc kiosk-backend  -o=jsonpath='{ .spec.ports[?(@.name == "8080-tcp")].targetPort }')
 
-oc annotate dc/kiosk-frontend app.openshift.io/connects-to=kiosk-backend #<3>
+oc annotate dc/kiosk-frontend app.openshift.io/connects-to=kiosk-backend
 ....
-<1> env variable that points to backend service
-<2> env variable that points to backend service port
+* `COMPONENT_BACKEND_HOST` is an env variable that points to backend service
+* `COMPONENT_BACKEND_PORT` is an env variable that points to backend service port
+* `app.openshift.io/connects-to=kiosk-backend` is an annotation to show connection from frontend component to backend on the web console
 
 NOTE: `oc get svc kiosk-backend --template={{.spec.clusterIP}}` provides service name and 
 `oc get svc kiosk-backend  -o=jsonpath='{ .spec.ports[?(@.name == "8080-tcp")].targetPort }'` gives you the service port. You can find these values by running `oc get svc kiosk-backend` directly and substitute those values. The above line shows how you can script it all into one line. 
@@ -177,9 +174,9 @@ Test in the browser, you will see this screen.Place and order and confirm that y
 [.float-group]
 --
 [.left]
-image::images/multitiered2.png[form,200,400] 
+image::images/multitiered2.png[form,400] 
 
-image::images/multitiered3.png[image2,200,200]
+image::images/multitiered3.png[image2,400]
 --
 
 
@@ -199,7 +196,7 @@ oc delete all -l app=kiosk-backend
 
 * Delete  database component
 ----
-oc delete all -l app=mongodb   
+oc delete all -l app=mongodb-ephemeral
 ----
 
 * Delete database secret
