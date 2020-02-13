@@ -33,8 +33,8 @@ This is a developer day workshop for OpenShift Container Platform
 * Using web-hooks for build automation
 * Rollback deployments
 * Using SSL
-* Using ConfigMaps
-* Using Persistent Storage <<future>>
+* <<14.UsingConfigmaps.adoc#,Using ConfigMaps>>
+* <<15.UsingPersistentStorage.adoc#,Using Persistent Storage>>
 * Deploy a serverless application <<future>>
 
 === DevOps
@@ -45,8 +45,6 @@ This is a developer day workshop for OpenShift Container Platform
 * <<21.ABTesting.adoc#,AB Testing>>
 
 === Troubleshooting
-* Troubleshoot application failures
+* <<24.TroubleshootingApplications.adoc#,Troubleshoot application failures>>
 * Using Kibana to analyze application logs
 * Monitoring application metrics
-
-
