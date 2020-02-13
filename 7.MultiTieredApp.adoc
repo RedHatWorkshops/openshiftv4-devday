@@ -58,6 +58,11 @@ This will deploy the database and also create a secret that has credentials to c
 <2> this is the database service
 <3> this is the deploymentconfig
 
+Once deployed, you have the first tier of the 3-tier app deployed that shows up on the web console as
+
+
+image::images/multitiered4.png[image,200]
+
 
 == Deploy Backend Application
 
@@ -107,7 +112,37 @@ In the meanwhile, we will patch the deployment configuration to add environment 
 oc patch dc/kiosk-backend --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env", "value": [ { "name": "username", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-user" }  } },{ "name": "password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-password" }  } },{ "name": "database_name", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-name" }  } },{ "name": "admin_password", "valueFrom": {  "secretKeyRef": { "name": "mongodb", "key": "database-admin-password" }  } } ] }]'
 ....
 
-The above creates the following secret mappings and assigns respective values from the secrets to environment variables. The environment variables will be already set when your container comes up in the pod.
+Applying this patch will add the following to the deployment configuration. You can check the deployment configuration by running `oc get dc/kiosk-backend -o yaml`.
+
+----
+    spec:
+      containers:
+      - env:
+        - name: username
+          valueFrom:
+            secretKeyRef:
+              key: database-user
+              name: mongodb
+        - name: password
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: mongodb
+        - name: database_name
+          valueFrom:
+            secretKeyRef:
+              key: database-name
+              name: mongodb
+        - name: admin_password
+          valueFrom:
+            secretKeyRef:
+              key: database-admin-password
+              name: mongodb
+
+----
+
+
+This configuration creates the secret mappings and assigns respective values from the secrets to the environment variables when the container starts running. 
 
 [cols=2*, options=header]
 |===
@@ -129,23 +164,30 @@ The above creates the following secret mappings and assigns respective values fr
 
 
 
+Once deployed, you have the 1st and 2nd tiers of the 3-tier app deployed that shows up on the web console as
+
+
+image::images/multitiered5.png[image,350]
+
 == Deploy Frontend
 
 Let us now deploy the frontend component. While creating the frontend we will also link this to the backend component that we deployed in the last step by passing the environment variables that point to the backend service.
 
 [NOTE]
 You can deploy this from web console by browsing through the the catalog and supplying the source code URL as input and selecting the runtime.
+
 ....
 
 oc new-app https://github.com/RedHatWorkshops/openshiftv4-odo-workshop.git \
 --name=kiosk-frontend \
 -l app.openshift.io/runtime=nodejs,\
 app.kubernetes.io/part-of=multi-tiered-app \
--e COMPONENT_BACKEND_HOST=$(`oc get svc kiosk-backend --template={{.spec.clusterIP}})` \
+-e COMPONENT_BACKEND_HOST=$(oc get svc kiosk-backend --template={{.spec.clusterIP}}) \
 -e COMPONENT_BACKEND_PORT=$(oc get svc kiosk-backend  -o=jsonpath='{ .spec.ports[?(@.name == "8080-tcp")].targetPort }')
 
 oc annotate dc/kiosk-frontend app.openshift.io/connects-to=kiosk-backend
 ....
+
 * `COMPONENT_BACKEND_HOST` is an env variable that points to backend service
 * `COMPONENT_BACKEND_PORT` is an env variable that points to backend service port
 * `app.openshift.io/connects-to=kiosk-backend` is an annotation to show connection from frontend component to backend on the web console
@@ -161,6 +203,10 @@ oc expose svc kiosk-frontend
 
 [NOTE] 
 We did not expose our backend application to create an openshift route. This is because it would be accessed only within the openshift cluster. So, you would only want to expose those services that need to be accessed from outside the cluster.
+
+Once done, you have all 3 tiers of your app deployed that shows up on the web console as
+
+image::images/multitiered6.png[image,400]
 
 == Test App
 Now test the application by accessing its URL. You can get the URL by running 
