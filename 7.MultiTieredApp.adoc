@@ -220,9 +220,10 @@ Test in the browser, you will see this screen.Place and order and confirm that y
 [.float-group]
 --
 [.left]
-image::images/multitiered2.png[form,400] 
-
-image::images/multitiered3.png[image2,400]
+image:images/multitiered2.png[form,400] 
+once you place order you see
+[.right]
+image:images/multitiered3.png[image2,400]
 --
 
 

@@ -68,10 +68,12 @@ image::devconsoleapp3.png[image,300]
 ** Outer circle represents the application, It shows `webapp`, the name we gave as the **Application Name**
 ** Inner circle represents the deployment named `react-sample`
 
-* Hover over the icon on different corners. You will notice `Build Running` on  the bottom left corner of the image. Clicking on image::devconsoleapp12.png[image,30,30,float="left"]
- `Edit Source` on the bottom right image::devconsoleapp13.png[image,30,float="left"] and `Open URL`on the top right of the image above image::devconsoleapp6.png[image,30, float="left"]
+* Hover over the icon on different corners. You will notice
+** `Build Running` image:devconsoleapp12.png[BuildRunning,30,30]. Clicking in this will show build logs.
+** `Edit Source` image:devconsoleapp13.png[EditSource,30] will take you to source code
+** `Open URL` image:devconsoleapp6.png[URL,30] will open the URL/Route for this app on a new browser tab
 
-* Clicking on `Build Running` takes you to `Build Logs`. OpenShift builds run in a pod that comes up and runs a source-to-image build. 
+* Click on image:devconsoleapp12.png[BuildRunning,30,30] that takes you to `Build Logs`. OpenShift builds run in a pod that comes up and runs a source-to-image build. 
 
 image::devconsoleapp4.png[image]
 
