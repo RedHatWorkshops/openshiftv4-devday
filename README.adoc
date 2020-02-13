@@ -26,7 +26,7 @@ This is a developer day workshop for OpenShift Container Platform
 * Debugging an application using CodeReady Workspaces
 
 === Running Applications on OpenShift Cluster
-* Deploy a multi-tiered application
+* <<7.MultiTieredApp.adoc#,Deploy a multi-tiered application>>
 * <<8.ApplicationScaling.adoc#,Scaling Application Instances>>
 * <<9.DeployBinaryArtifacts.adoc#,Deploying binary artifacts>>
 * Configuring health probes
