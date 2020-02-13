@@ -49,7 +49,7 @@ Click on `Create` button
 
 * You will notice the topology view now changes to what is show in the figure below:
 
-image::./images/devconsoleapp3.png[image]
+image::./images/devconsoleapp3.png[image,300]
 
 * There are two circles here
 ** Outer circle represents the application, It shows `webapp`, the name I gave as the **Application Name**
@@ -73,13 +73,11 @@ Observe the build logs to note the above steps in the logs.
 
 * Once the S2I build is complete, deployment runs to deploy the application instance as a pod. At that point you will notice the pod starts running as shown below.
 
-image::./images/devconsoleapp5.png[image]
+image::./images/devconsoleapp5.png[image,300]
 
+* Now click on the URL icon on the top right
 
-* Now click on the URL icon on the top right 
-
-image::./images/devconsoleapp6.png[image] 
-
+image::./images/devconsoleapp6.png[image,30, float="left"] 
 which takes you to the running application in a new browser tab.
 
 You have successfully built and deployed an application using web console!!
@@ -94,7 +92,7 @@ image::./images/devconsoleapp7.png[image]
 
 * **Actions** drop down, allows you to make changes to the deployment. As an example, navigate to  **Actions**->**Edit Labels** and add a label `app.openshift.io/runtime=js` and **Save**. You will notice that the application shows the icon indicating JavaScript based application as shown below.
 
-image::./images/devconsoleapp8.png[image] 
+image::./images/devconsoleapp8.png[image,300] 
 
 * **Resources** tab allows you to directly get to openshift resources such as Pods, Builds, Services, Route. So it is like a summary for all the objects related to this deployment. Navigate to each of these objects and also look at their YAMLs and understand the options that the WebConsole provides to edit these objects.
 
