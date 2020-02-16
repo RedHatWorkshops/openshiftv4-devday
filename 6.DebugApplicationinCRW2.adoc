@@ -1,0 +1,118 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+:imagesdir: ./images
+
+= Deploy Golang App on Red Hat CodeReady Workspaces 2
+
+== Prerequisites
+* You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
+* You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
+* You have access to a CodeReady Workspaces URL. Ask your workshop coordinator for URL if you don't have one.
+
+
+== Introduction
+CodeReady Workspaces 2.0 provides developer environments that are Kubernetes pods running on OpenShift. In those sandboxes are the components and tools needed to code on a project: a browser-based editor, the plugins, the tools, and the different runtimes required for your project. Everything is running in containers, providing highly consistent, repeatable, and reproducible developer environments—zero config needed, zero pain.
+
+== Exercise
+
+=== CodeReady Workspaces 2 Debugging 
+* Using the application deployed in Excerise <<5.whatever$, >>  we will debug and then deploy the application to OpenShift
+
+=== Application Debugging
+click on the debug icon on the right hand of the screen
+image::codeready-debugmenu.png
+
+click on `No Configuration` then select `Add Configuration`
+
+paste the following in the launch.json file
+```
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Launch file",
+          "type": "go",
+          "request": "launch",
+          "mode": "debug",
+          "program": "/projects/src/github.com/golang/example/main.go"
+      }
+  ]
+}
+```
+
+Navigate back to `Explorer ` and select the `main.go` file
+* In Main.go navigate to line 19
+* Click next to 19 to add line to debug
+* image::codeready-debugline19.png
+
+Navigate back to debug window  click the play icon to start debugging
+
+View the results of the debug step thru as needed
+image::codeready-debugresults.png
+
+Click on the stop icon to stop debugging
+
+=== OpenShift Deployment
+
+Login to OpenShift
+
+Create new project
+```
+$ oc new-project userxx
+```
+NOTE: Change userXX to your username provided by your  workshop coordinator.
+
+Create new build for Application
+```
+$ oc new-build --name cookbook --binary --strategy docker
+```
+
+Upload local code and build it in openshift
+```
+$ oc start-build cookbook --from-dir=.
+```
+
+View the logs from the build
+```
+$ oc logs -f build/cookbook-1
+```
+
+Create New app from binary build
+```
+$ oc new-app cookbook --name mycookbook
+```
+
+Get pod status
+```
+$ oc get pods
+```
+
+expose route
+```
+$ oc expose svc/mycookbook
+```
+
+get route
+```
+$ oc get route
+```
+
+Open url in webpage
+```
+```
+
+Add the following to the end of the url `/?name=yourname` and press  `Enter`
+
+delete project
+```
+$ oc delete project userxx
+```
+
+== Summary

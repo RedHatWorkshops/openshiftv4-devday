@@ -43,27 +43,31 @@ With OpenShift files that live on the container instance are ephemeral. This mea
 |vSphere    |[*] | [ ] | [ ]
 |=======================
 
- 
+
 *PersistentVolumeClaim* is an API Object, which represents a request for storage by a developer. It is similar to a Pod in that Pods consume node resources and PVCs consume PV resources. A PVC provides an abstraction layer to underlying storage. An administrator could create a number of static persistent volumes (PVs) that can later be bound to one or more persistent volume claims.
 
 
-== Exercise  
+== Exercise
 
-=== Prepare Exercise 
+=== Prepare Exercise
+* Login to OpenShift 
+
 * Create new project
 ```
-$ oc new-project pvc-demo
+$ oc new-project pvc-demo-userXX
 ```
+
+NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 === Create a Persistent Volume Claim
 * Create a pv definition file.
 ```
-cat >myclaim-pvc.yml<<EOF
+cat >myclaim-userXX-pvc.yml<<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: myclaim
-  namespace: pvc-demo
+  name: myclaim-userXX
+  namespace: pvc-demo-userXX-userXX
 spec:
   accessModes:
   - ReadWriteOnce
@@ -76,7 +80,7 @@ EOF
 
 * Create the persistent volume claim.
 ```
-oc create -f myclaim-pvc.yml
+oc create -f myclaim-userXX-pvc.yml
 ```
 
 * Mount your pv to a pod by deploying sample app
@@ -106,11 +110,11 @@ spec:
       volumes:
       - name: mypd
         persistentVolumeClaim:
-          claimName: myclaim
+          claimName: myclaim-userXX
 EOF
 ```
 
-* Deploy app 
+* Deploy app
 ```
 $ oc create -f deploy-pvc.yml
 deployment.apps/pv-deploy created
@@ -128,7 +132,7 @@ pv-deploy-f8d4f87f6-mlspk   1/1     Running   0          2m26s
 ```
 $ oc describe pod pv-deploy-f8d4f87f6-mlspk
 Name:         pv-deploy-f8d4f87f6-mlspk
-Namespace:    pvc-demo
+Namespace:    pvc-demo-userXX
 Priority:     0
 Node:         ip-10-0-159-218.us-east-2.compute.internal/10.0.159.218
 Start Time:   Fri, 31 Jan 2020 17:22:18 +0000
@@ -180,7 +184,7 @@ Conditions:
 Volumes:
   mypd:
     Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  myclaim
+    ClaimName:  myclaim-userXX
     ReadOnly:   false
   default-token-27rcv:
     Type:        Secret (a volume populated by a Secret)
@@ -193,7 +197,7 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
 Events:
   Type    Reason                  Age        From                                                 Message
   ----    ------                  ----       ----                                                 -------
-  Normal  Scheduled               <unknown>  default-scheduler                                    Successfully assigned pvc-demo/pv-deploy-f8d4f87f6-mlspk to ip-10-0-159-218.us-east-2.compute.internal
+  Normal  Scheduled               <unknown>  default-scheduler                                    Successfully assigned pvc-demo-userXX/pv-deploy-f8d4f87f6-mlspk to ip-10-0-159-218.us-east-2.compute.internal
   Normal  SuccessfulAttachVolume  3m19s      attachdetach-controller                              AttachVolume.Attach succeeded for volume "pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7"
   Normal  Pulled                  3m9s       kubelet, ip-10-0-159-218.us-east-2.compute.internal  Container image "centos:7" already present on machine
   Normal  Created                 3m8s       kubelet, ip-10-0-159-218.us-east-2.compute.internal  Created container shell
@@ -238,17 +242,16 @@ $ oc delete -f oc delete -f deploy-pvc.yml
 ```
 $ oc get pvc
 NAME      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-myclaim   Bound    pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7   1Gi        RWO            gp2            10m
+myclaim-userXX   Bound    pvc-a4a724b1-b711-40a1-a7c9-f89b7db209c7   1Gi        RWO            gp2            10m
 
-$ oc delete pvc myclaim
-persistentvolumeclaim "myclaim" deleted
+$ oc delete pvc myclaim-userXX
+persistentvolumeclaim "myclaim-userXX" deleted
 ```
 
-* Delete Project 
+* Delete Project
 ```
-$ oc delete project  pvc-demo
+$ oc delete project  pvc-demo-userXX
 ```
 
 == Summary
 In this lab learned about persistent volumes and persistent volume claims. We then created a persistent volume claim and deployed an application.
-
