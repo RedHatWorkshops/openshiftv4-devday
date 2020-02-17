@@ -97,11 +97,68 @@ image::codeready-openinnewtab.png[]
 
 Review summary and continue to Lab <<6.DebugApplicationinCRW2.adoc#, Debugging an application using CodeReady Workspaces>>
 
+=== OpenShift Deployment
+
+Navigate to the terminal in CodeReady Workspaces 2
+
+Login to OpenShift
+
+Create new project
+```
+$ oc new-project codeready-app-userXX
+```
+NOTE: Change userXX to your username provided by your  workshop coordinator.
+
+Create new build for Application
+```
+$ oc new-build --name goapp-userXX --binary --strategy docker
+```
+
+Upload local code and build it in openshift
+```
+$ oc start-build goapp-userXX  --from-dir=.
+```
+
+View the logs from the build
+```
+$ oc logs -f build/goapp-userXX-1
+```
+
+Create New app from binary build
+```
+$ oc new-app goapp-userXX  --name codeready-app-userXX
+```
+
+Get pod status.
+```
+$ oc get pods
+```
+
+Expose route to access the application externally. 
+```
+$ oc expose svc/codeready-app-userXX
+```
+
+Get route
+```
+$ oc get route
+```
+
+Open url in webpage
+
+Add the following to the end of the url `/?name=yourname` and press  `Enter`
+
+Delete project
+```
+$ oc delete project codeready-app-userXX
+```
+
 == Summary
 .In this lab we learned the following.
 - Navigate the Red Hat CodeReady Workspaces 2 UI
 - Created an application from a Git Repo
 - Ran the application within Red Hat CodeReady Workspaces 
+- How to Deploy an application from CodeReady Workspaces 2 to OpenShift
 
 == References 
 - https://developers.redhat.com/blog/2019/12/03/red-hat-codeready-workspaces-2-new-tools-to-speed-kubernetes-development/[Red Hat CodeReady Workspaces 2: New tools to speed Kubernetes development]
