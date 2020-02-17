@@ -35,7 +35,7 @@ A *factory* is the means by which you build and share your workspace(s).
 
  -  *Example URL:* http://codeready-code-readyworkspaces.apps.example.com
 
-*Enter username and password provided by the workshop coordinator.*'
+*Enter username and password provided by the workshop coordinator.*
 
 *Allow selected permissions if promoted.*
 
