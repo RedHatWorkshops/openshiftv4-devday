@@ -59,12 +59,11 @@ image::codeready-workspace-creation.png[]
 
 image::code-ready-workspaces-mainscreen.png[]
 
-*To  access your code click on the `paper icon` on the right hand side of the screen.*
+*To access your code click on the `paper icon` on the right hand side of the screen.*
 
 image::codeeready-explorer.png[]
 
-*To access the terminal click on the box icon on the left hand side of the screen.*
-* click on `_New terminal`
+*To access the terminal click on the box icon on the left hand side of the screen click on `_New terminal`.*
 
 image::codeready-terminal.png[]
 
