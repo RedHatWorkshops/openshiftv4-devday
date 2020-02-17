@@ -50,6 +50,8 @@ image::update-crw2-accountinfo.png[]
   - Repository URL: https://github.com/tosin2013/codeready-go-app.git
   - Click `Save`
   - Click `CREATE & OPEN`
+  
+NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 image::codeready-workspace-creation.png[]
 
