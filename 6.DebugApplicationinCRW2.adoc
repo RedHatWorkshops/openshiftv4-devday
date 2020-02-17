@@ -50,6 +50,7 @@ Paste the following in the launch.json file
 ```
 
 Navigate back to `Explorer` and select the `main.go` file
+
 * In Main.go navigate to line 19
 * Click next to 19 to add line to debug
 
