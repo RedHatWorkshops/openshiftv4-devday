@@ -24,12 +24,13 @@ CodeReady Workspaces 2.0 provides developer environments that are Kubernetes pod
 * Using the application deployed in Excerise <<5.whatever$, >>  we will debug and then deploy the application to OpenShift
 
 === Application Debugging
-click on the debug icon on the right hand of the screen
-image::codeready-debugmenu.png
+Click on the debug icon on the right hand of the screen.
 
-click on `No Configuration` then select `Add Configuration`
+image::codeready-debugmenu.png[]
 
-paste the following in the launch.json file
+Click on `No Configuration` then select `Add Configuration`.
+
+Paste the following in the launch.json file
 ```
 {
   // Use IntelliSense to learn about possible attributes.
@@ -50,69 +51,74 @@ paste the following in the launch.json file
 Navigate back to `Explorer ` and select the `main.go` file
 * In Main.go navigate to line 19
 * Click next to 19 to add line to debug
-* image::codeready-debugline19.png
+
+image::codeready-debugline19.png[]
 
 Navigate back to debug window  click the play icon to start debugging
 
 View the results of the debug step thru as needed
-image::codeready-debugresults.png
+
+image::codeready-debugresults.png[]
 
 Click on the stop icon to stop debugging
 
 === OpenShift Deployment
 
+Navigate to the terminal in CodeReady Workspaces 2
+
 Login to OpenShift
 
 Create new project
 ```
-$ oc new-project userxx
+$ oc new-project codeready-app-userXX
 ```
 NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 Create new build for Application
 ```
-$ oc new-build --name cookbook --binary --strategy docker
+$ oc new-build --name goapp-userXX --binary --strategy docker
 ```
 
 Upload local code and build it in openshift
 ```
-$ oc start-build cookbook --from-dir=.
+$ oc start-build goapp-userXX  --from-dir=.
 ```
 
 View the logs from the build
 ```
-$ oc logs -f build/cookbook-1
+$ oc logs -f build/goapp-userXX -1
 ```
 
 Create New app from binary build
 ```
-$ oc new-app cookbook --name mycookbook
+$ oc new-app goapp-userXX  --name codeready-app-userXX
 ```
 
-Get pod status
+Get pod status.
 ```
 $ oc get pods
 ```
 
-expose route
+Expose route to access the application externally. 
 ```
-$ oc expose svc/mycookbook
+$ oc expose svc/goapp-userXX 
 ```
 
-get route
+Get route
 ```
 $ oc get route
 ```
 
 Open url in webpage
-```
-```
 
 Add the following to the end of the url `/?name=yourname` and press  `Enter`
 
-delete project
+Delete project
 ```
 $ oc delete project userxx
 ```
 
 == Summary
+.In this lab we learned the following.
+- How to debug an application in CodeReady Workspaces 2
+- How to Deploy an application from CodeReady Workspaces 2 to OpenShift

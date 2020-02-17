@@ -107,10 +107,6 @@ Containers:
       /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
 ```
 
-*View crashes from Events tab in UI*
-
-image::images/crashing-app-1-rsrl2.png[]
-
 *Delete deployment*
 
 ```
@@ -257,10 +253,6 @@ $ oc get events
 2s          Warning   Unhealthy           pod/nodejs-ex-1-dr2wr                  Readiness probe failed: HTTP probe failed with statuscode: 404
 36s         Normal    Killing             pod/nodejs-ex-1-dr2wr                  Container nodejs-ex failed liveness probe, will be restarted
 ```
-
-View health check from Events tab in UI
-
-image::images/nodejs-ex-1-dr2wr.png[]
 
 Delete Deployment
 ```
