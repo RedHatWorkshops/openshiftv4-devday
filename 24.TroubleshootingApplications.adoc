@@ -1,19 +1,22 @@
 = Troubleshooting Applications
+:toc:
 
 == Prerequisites
 * You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
 * You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
 
 == Introduction
-Below are common application troubleshooting techniques to use while developing an application. We will perform different exercises to see how to resolve different issues that may come up while developing your application. 
+Below are common application troubleshooting techniques to use while developing an application. We will perform different exercises to see how to resolve different issues that may come up while developing your application.
 
 == Exercises
-=== Prepare Exercise 
+=== Prepare Exercise
+* Login to OpenShift
+
 * Create new project
 ```
-$ oc new-project troubleshooting-apps
+$ oc new-project troubleshooting-apps-userXX
 ```
-
+NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 === Image Pull Failures
 
@@ -103,10 +106,6 @@ Containers:
     Mounts:
       /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
 ```
-
-*View crashes from Events tab in UI*  
-
-image::images/crashing-app-1-rsrl2.png[]
 
 *Delete deployment*
 
@@ -220,7 +219,7 @@ $ oc describe pod secret-pod
 Events:
   Type     Reason       Age                From                                                 Message
   ----     ------       ----               ----                                                 -------
-  Normal   Scheduled    <unknown>          default-scheduler                                    Successfully assigned troubleshooting-apps/secret-pod to ip-10-0-159-218.us-east-2.compute.internal
+  Normal   Scheduled    <unknown>          default-scheduler                                    Successfully assigned troubleshooting-apps-userXX/secret-pod to ip-10-0-159-218.us-east-2.compute.internal
   Warning  FailedMount  25s (x8 over 88s)  kubelet, ip-10-0-159-218.us-east-2.compute.internal  MountVolume.SetUp failed for volume "myothersecret" : secret "myothersecret" not found
 ```
 
@@ -235,7 +234,7 @@ $ oc delete -f bad-secret-pod.yml
 - The probes are too sensitive - Does that application take a while for it to start or respond?
 - The application is no longer responding correctly to the Probe - Could the database be misconfigured.
 
-Deploy nodejs app 
+Deploy nodejs app
 ```
 $ oc new-app https://github.com/sclorg/nodejs-ex -l name=nodejs
 ```
@@ -255,17 +254,13 @@ $ oc get events
 36s         Normal    Killing             pod/nodejs-ex-1-dr2wr                  Container nodejs-ex failed liveness probe, will be restarted
 ```
 
-View health check from Events tab in UI
-
-image::images/nodejs-ex-1-dr2wr.png[]
-
 Delete Deployment
 ```
 $ oc delete all --selector app=nodejs-ex
 ```
 
 === Validation Errors
-Lets validate a sample nginx app 
+Lets validate a sample nginx app
 ```
 $ cat >validate-deployment.yaml<<EOF
 apiVersion: apps/vl
@@ -338,7 +333,7 @@ yaml.scanner.ScannerError: mapping values are not allowed here
   in "<stdin>", line 3, column 11
 ```
 
-Change apiVersion back to v1 and correct spacing 
+Change apiVersion back to v1 and correct spacing
 ```
 $ cat validate-deployment.yaml
 apiVersion: apps/v1
@@ -347,7 +342,7 @@ kind: Deployment
   name: nginx-deployment
 ```
 
-Validate YAML 
+Validate YAML
 ```
 $ python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' <  validate-deployment.yaml
 $ oc apply -f validate-deployment.yaml --dry-run --validate=true
@@ -357,8 +352,8 @@ deployment.apps/nginx-deployment created (dry run)
 === Container not updating
 An example of a container not updating can be due to the following scenario
 
-.Creating a deployment using an image tag (e.g. tcij1013/myapp:v1)  
-- Notice there is a bug in myapp  
+.Creating a deployment using an image tag (e.g. tcij1013/myapp:v1)
+- Notice there is a bug in myapp
 - Build a new image and push the to the same tag (tcij1013/myapp:v1)
 - Delete all the myapp Pods, and watch the new ones get created by the deployment
 - Realize that the bug is still present
@@ -376,7 +371,7 @@ Since the image is tagged as v1 in the above example the default pull policy is 
 - Specify ImagePullPolicy: Always in your deployment.
 
 == Summary
-.In this lab we learned how to troubleshoot the following 
+.In this lab we learned how to troubleshoot the following
 - Image Pull Failures
 - Application Crashing
 - Invalid ConfigMap or Secrets

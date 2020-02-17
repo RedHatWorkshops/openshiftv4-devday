@@ -3,12 +3,13 @@
 == Prerequisites
 * You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
 * You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
-* Git must be installed on workstation. 
+* Git must be installed on workstation.
 
 == Introduction
 A `ConfigMap` object provides mechanisms to inject containers with configuration data while keeping containers agnostic of OpenShift Container Platform. A ConfigMap can be used to store fine-grained information like individual properties or coarse-grained information like entire configuration files or JSON blobs. In the lab below we will modify the properties file of a webpage using a `ConfigMap`.
 
-The `ConfigMap` object holds key-value pairs of configuration data that can be consumed in pods or used to store configuration data. ConfigMaps is similar to secrets but it is not recommended for sensitive data. 
+The `ConfigMap` object holds key-value pairs of configuration data that can be consumed in pods or used to store configuration data. ConfigMaps is similar to secrets but it is not recommended for sensitive data.
+
 
 == Exercise
 Clone configmap-demo from git
@@ -16,11 +17,14 @@ Clone configmap-demo from git
 $ git clone https://github.com/tosin2013/configmap-demo.git
 $ cd configmap-demo
 ```
+Login to OpenShift  
 
-Lets create a project 
+Lets create a project
 ```
-$ oc new-project configmap-lab
+$ oc new-project configmap-lab-userXX
 ```
+
+NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 Lets set the color we would like to use
 ```
@@ -30,7 +34,7 @@ $ echo "color=$COLOR" > ui.properties
 
 Let’s create a ConfigMap, named config, with both a literal text, message=YOUR MESSAGE, and the configuration file:
 ```
-$ export PERSONAL_MESSAGE="YOUR MESSAGE"  # Change the message 
+$ export PERSONAL_MESSAGE="YOUR MESSAGE"  # Change the message
 $ oc create configmap config \
             --from-literal=message="${PERSONAL_MESSAGE}" \
             --from-file=ui.properties
@@ -47,7 +51,7 @@ $ oc create -f configmap-demo-build.yml
 $ oc create -f  configmap-demo-deployment.yml
 ```
 
-Check the deployment 
+Check the deployment
 ```
 $  oc get pods
 NAME                      READY   STATUS      RESTARTS   AGE
@@ -56,25 +60,25 @@ configmap-demo-1-deploy   0/1     Completed   0          3m18s
 configmap-demo-1-kshbh    1/1     Running     0          3m9s
 ```
 
-Launch Webpage 
+Launch Webpage
 ```
-$ oc get routes 
+$ oc get routes
 ```
 
-Update configmap 
+Update configmap
 ```
 $ export COLOR=green
 $ echo "color=$COLOR" > ui.properties
 ```
 
-Delete old config map 
+Delete old config map
 ```
 $ oc delete  configmap config
 ```
 
 Lets create a new config map
 ```
-$ export PERSONAL_MESSAGE="NEW MESSAGE"  # Change the message 
+$ export PERSONAL_MESSAGE="NEW MESSAGE"  # Change the message
 $ oc create configmap config \
             --from-literal=message="${PERSONAL_MESSAGE}" \
             --from-file=ui.properties
@@ -85,14 +89,14 @@ Delete old config map pod
 $ oc delete pod configmap-demo-1-kshbh
 ```
 
-Check pod status 
+Check pod status
 ```
-$ oc get pods 
+$ oc get pods
 ```
 
-Reload Webpage 
+Reload Webpage
 
-Delete deployment 
+Delete deployment
 ```
 $ oc delete -f configmap-demo-build.yml
 $ oc delete -f  configmap-demo-deployment.yml
@@ -100,9 +104,8 @@ $ oc delete -f  configmap-demo-deployment.yml
 
 Delete project 
 ```
-$ oc delete configmap-lab
+$ oc delete configmap-lab-userXX
 ```
 
 == Summary
-In this lab we learned how about configmaps and its uses. We also deployed a simple web  application and modified the properties and environment using configmaps. 
-
+In this lab we learned how about configmaps and its uses. We also deployed a simple web  application and modified the properties and environment using configmaps.

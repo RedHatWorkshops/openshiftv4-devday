@@ -22,8 +22,8 @@ This is a developer day workshop for OpenShift Container Platform
 * <<4.DeployAppUsingODO.adoc#, Deploy an application using `odo` CLI>>
 
 === Using an IDE
-* Using CodeReady Workspaces build containerized application in a container
-* Debugging an application using CodeReady Workspaces
+* <<5.RedHatCodeReadyWorkspaces2.adoc#, Using CodeReady Workspaces build containerized application in a container>>
+* <<6.DebugApplicationinCRW2.adoc#, Debugging an application using CodeReady Workspaces>>
 
 === Running Applications on OpenShift Cluster
 * <<7.MultiTieredApp.adoc#,Deploy a multi-tiered application>>
