@@ -31,13 +31,20 @@ A *factory* is the means by which you build and share your workspace(s).
 
 
 === CodeReady Workspaces 2 Navigation 
-1. Access your code ready workspace with the url provided by the workshop coordinator.  
+*Access your code ready workspace with the url provided by the workshop coordinator.*
+
  -  *Example URL:* http://codeready-code-readyworkspaces.apps.example.com
-2. Enter username and password provided by the workshop coordinator.
-3. Allow selected permissions if promoted.
-4. Update account information.
-5. image::update-crw2-accountinfo.png
-6. Create Workspace with the following values
+
+*Enter username and password provided by the workshop coordinator.*'
+
+*Allow selected permissions if promoted.*
+
+*Update account information.*
+
+image::update-crw2-accountinfo.png[]
+
+*Create Workspace with the following values*
+
   - Select `Go` stack
   - Project Name: codeready-go-app-userXX
   - Repository URL: https://github.com/tosin2013/codeready-go-app.git
@@ -45,6 +52,8 @@ A *factory* is the means by which you build and share your workspace(s).
   - Click `CREATE & OPEN`
 
 image::codeready-workspace-creation.png[]
+
+*CodeReady Workspaces 2 Main Screen*
 
 image::code-ready-workspaces-mainscreen.png[]
 
