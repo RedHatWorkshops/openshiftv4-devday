@@ -13,6 +13,7 @@ endif::[]
 * You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
 * You have credentials to login. Ask your workshop coordinator for credentials to log onto the OpenShift cluster
 * You have access to a CodeReady Workspaces URL. Ask your workshop coordinator for URL if you don't have one.
+* Completed <<5.RedHatCodeReadyWorkspaces2.adoc#, Using CodeReady Workspaces build containerized application in a container>>
 
 
 == Introduction
