@@ -1,0 +1,80 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: multi-project-pipeline
+spec:
+  params:
+    - default: php-app
+      description: application name
+      name: APP_NAME
+      type: string
+    - default: development
+      description: development project name
+      name: DEV_PROJ
+      type: string
+    - default: testing
+      description: QA  project name
+      name: QA_PROJ
+      type: string
+  resources:
+    - name: source-code
+      type: git
+    - name: container-image
+      type: image
+  tasks:
+    - name: build-in-dev
+      params:
+        - name: MINOR_VERSION
+          value: '2'
+        - name: PATH_CONTEXT
+          value: .
+        - name: TLSVERIFY
+          value: 'false'
+      resources:
+        inputs:
+          - name: source
+            resource: source-code
+        outputs:
+          - name: image
+            resource: container-image
+      taskRef:
+        kind: ClusterTask
+        name: s2i-php
+    - name: deploy-in-dev
+      params:
+        - name: ARGS
+          value:
+            - rollout
+            - latest
+            - dc/$(params.APP_NAME)
+      runAfter:
+        - build-in-dev
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: tag-image
+      params:
+        - name: ARGS
+          value:
+            - tag
+            - '$(params.DEV_PROJ)/$(params.APP_NAME):latest'
+            - '$(params.DEV_PROJ)/$(params.APP_NAME):promote-qa'
+      runAfter:
+        - deploy-in-dev
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: deploy-in-qa
+      params:
+        - name: ARGS
+          value:
+            - rollout
+            - latest
+            - dc/$(params.APP_NAME)
+            - '-n'
+            - $(params.QA_PROJ)
+      runAfter:
+        - tag-image
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
