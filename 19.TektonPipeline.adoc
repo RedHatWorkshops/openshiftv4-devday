@@ -241,7 +241,7 @@ NOTE: A running pipeline is an instance of pipeline and is called **pipelinerun*
 
 Click on the a taskrun to view its logs
 
-image::images/tekton7.png[image,2000]
+image::images/tekton8.png[image,2000]
 
 As the pipeline gets to deploy steps you will note the application gets redeployed. You can notice the pod getting redeployed on the developer console.
 
