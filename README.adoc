@@ -40,7 +40,7 @@ This is a developer day workshop for OpenShift Container Platform
 === DevOps
 * <<17.CodePromotion.adoc#,Code promotion across environments>>
 * Creating a pipeline with Jenkins on OpenShift
-* <<18.TektonPipeline.adoc#,Code Promotion with Tekton Pipelines>>
+* <<19.TektonPipeline.adoc#,Code Promotion with Tekton Pipelines>>
 * <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
 * <<21.ABTesting.adoc#,AB Testing>>
 
