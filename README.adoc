@@ -35,7 +35,9 @@ This is a developer day workshop for OpenShift Container Platform
 * Using SSL
 * <<14.UsingConfigmaps.adoc#,Using ConfigMaps>>
 * <<15.UsingPersistentStorage.adoc#,Using Persistent Storage>>
-* Deploy a serverless application <<future>>
+
+=== OpenShift Serverless and Eventing
+* https://github.com/RedHatWorkshops/knative-on-ocp4[Serverless Workshop]
 
 === DevOps
 * <<17.CodePromotion.adoc#,Code promotion across environments>>
