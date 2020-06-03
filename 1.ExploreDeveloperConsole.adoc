@@ -43,8 +43,10 @@ image::./images/devconsole4.png[image]
 *** **Search** allows you to search for all the artifacts in this project.
 *** **Events** show a stream of project events.
 
-## Summary
+## Review 
 In this lab, we logged into the cluster using Web Console and understood the layout and navigation of Developer console which is typically used by the application teams (developers, deployers, and builders)
 
+=== Next Deploy an Application
 
+* * <<2.DeployAppUsingWebConsole.adoc#, Deploy an application using Developer Console>>
 
