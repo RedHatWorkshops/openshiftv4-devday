@@ -48,5 +48,5 @@ In this lab, we logged into the cluster using Web Console and understood the lay
 
 === Next Deploy an Application
 
-* * <<2.DeployAppUsingWebConsole.adoc#, Deploy an application using Developer Console>>
+* <<2.DeployAppUsingWebConsole.adoc#, Deploy an application using Developer Console>>
 
