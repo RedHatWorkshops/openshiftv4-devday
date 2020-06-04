@@ -1,8 +1,12 @@
-== Installing Openshift CLI
-
+== Installing OpenShift Container Platform Command-line Interface (CLI)
 
 * Installing the
-link:https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html[oc] CLI
-
+link:https://docs.openshift.com/container-platform/4.4/cli_reference/openshift_cli/getting-started-cli.html[oc] Administer CLI (OpenShift Command-line Interface)
 * Installing 
-link:https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_developer_cli/installing-odo.html[odo]
+link:https://docs.openshift.com/container-platform/4.4/cli_reference/developer_cli_odo/installing-odo.html[odo] Developer CLI (OpenShift Do Command-line Interface)
+
+Resource link:https://cloud.redhat.com/openshift/install[OpenShift Container Platform 4]
+
+=== Next using OpenShift Developer Console
+
+* <<1.ExploreDeveloperConsole.adoc#, Explore OpenShift Developer Web Console>>
