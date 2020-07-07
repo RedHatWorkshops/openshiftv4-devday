@@ -35,12 +35,14 @@ This is a developer day workshop for OpenShift Container Platform
 * Using SSL
 * <<14.UsingConfigmaps.adoc#,Using ConfigMaps>>
 * <<15.UsingPersistentStorage.adoc#,Using Persistent Storage>>
-* Deploy a serverless application <<future>>
+
+=== OpenShift Serverless and Eventing
+* https://github.com/RedHatWorkshops/knative-on-ocp4[Serverless Workshop]
 
 === DevOps
 * <<17.CodePromotion.adoc#,Code promotion across environments>>
 * Creating a pipeline with Jenkins on OpenShift
-* Creating a lightweight pipeline with Tekton <<future>>
+* <<19.TektonPipeline.adoc#,Code Promotion with Tekton Pipelines>>
 * <<20.BlueGreenDeployment.adoc#,Blue Green Deployments>>
 * <<21.ABTesting.adoc#,AB Testing>>
 
