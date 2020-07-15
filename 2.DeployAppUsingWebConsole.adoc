@@ -48,7 +48,7 @@ image::devconsoleapp1.png[image]
 
 image::devconsoleapp2.png[image]
 
-Let us choose `Modern Web App` as the **Builder Image**. As soon as you select this, you will see a link to sample repository such as https://github.com/nodeshift-starters/react-web-app. 
+Let us choose `Modern Web App` as the **Builder Image**. As soon as you select this, you will see a link to sample repository such as https://github.com/nodeshift-starters/react-web-app.git 
 
 We will deploy this sample application as our code from github. So copy this URL and paste it as the **Git Repo URL**.
 
