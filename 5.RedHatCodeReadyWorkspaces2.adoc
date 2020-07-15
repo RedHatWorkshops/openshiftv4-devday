@@ -7,7 +7,7 @@ ifdef::env-github[]
 endif::[]
 :imagesdir: ./images
 
-= Deploy Golang App on Red Hat CodeReady Workspaces 2
+= Deploy Golang App on Red Hat CodeReady Workspaces 2.2
 
 == Prerequisites
 * You have access to OpenShift Web Console URL. Ask your workshop coordinator for URL if you don't have one.
@@ -43,21 +43,26 @@ A *factory* is the means by which you build and share your workspace(s).
 
 image::update-crw2-accountinfo.png[]
 
-*Create Workspace with the following values*
+*Create Golang workspace*
 
-  - Select `Go` stack
-  - Project Name: `codeready-go-app-userXX`
-  - Repository URL: https://github.com/tosin2013/codeready-go-app.git
-  - Click `Save`
-  - Click `CREATE & OPEN`
+  - Select `Go stack` tile
 
-NOTE: Change userXX to your username provided by your  workshop coordinator.
 
-image::codeready-workspace-creation.png[]
+image::codeready-go-tile.png[]
 
 *CodeReady Workspaces 2 Main Screen*
 
 image::code-ready-workspaces-mainscreen.png[]
+
+*Import golang application*  
+click on `Git Clone icon`  
+
+image::codeready-git-clone.png[]  
+
+Enter the repo address
+Git Repo: `https://github.com/tosin2013/codeready-go-app.git` and push ENTER  
+
+image::codeready-go-git-repo.png[]  
 
 *To access your code click on the `paper icon` on the right hand side of the screen.*
 
@@ -75,7 +80,7 @@ GOPATH=/go:/projects
 
 *Run the application*
 ```
-$ cd /projects/src/github.com/golang/example
+$ cd /projects/codeready-go-app/
 $ go run main.go
 ```
 
@@ -94,8 +99,6 @@ image::codeready-openinnewtab.png[]
 *Add the following to the end of the url `/?name=yourname` and press  `Enter`*
 
 *Go back to terminal and press CTRL+c*
-
-Review summary and continue to Lab <<6.DebugApplicationinCRW2.adoc#, Debugging an application using CodeReady Workspaces>>
 
 === OpenShift Deployment
 
@@ -148,10 +151,6 @@ Open url in webpage
 
 Add the following to the end of the url `/?name=yourname` and press  `Enter`
 
-Delete project
-```
-$ oc delete project codeready-app-userXX
-```
 
 == Summary
 .In this lab we learned the following.
