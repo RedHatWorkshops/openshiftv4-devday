@@ -77,21 +77,30 @@ spec:
 EOF
 ```
 
-
 * Create the persistent volume claim.
 ```
 oc create -f myclaim-userXX-pvc.yml
 ```
 
+* Get pvc status*
+```
+oc get pvc 
+```
+
 * Mount your pv to a pod by deploying sample app
 ```
 cat >deploy-pvc.yml<<EOF
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pv-deploy
+  labels:
+    app: mypv
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: mypv
   template:
     metadata:
       labels:
@@ -235,7 +244,7 @@ exit
 
 * Delete the deployment.
 ```
-$ oc delete -f oc delete -f deploy-pvc.yml
+$ oc delete -f deploy-pvc.yml
 ```
 
 * Delete the persistent volume claim.

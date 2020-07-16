@@ -37,22 +37,33 @@ We have provided a warfile for a simple petstore application
 https://raw.githubusercontent.com/RedHatWorkshops/ps/master/deployments/ROOT.war[here]. If you want to use this war file
 
 ```
+$ cd /binarytest/deployments/  
+
 $ wget https://raw.githubusercontent.com/RedHatWorkshops/ps/master/deployments/ROOT.war
 
-$ mv ROOT.war deployments/  
+$ cd ..
 ```
 **Note** that the war file needs to be in the `deployments` folder. You can verify running `ls -lR` as shown below.
 
 ....
 $ ls -lR
-
+.:
 total 0
-drwxr-xr-x 3 veer staff 102 Jul 5 2015 deployments
+drwxr-xr-x. 2 default root 22 Jul 16 13:10 deployments
+drwxr-xr-x. 3 default root 17 Jul 16 13:10 modules
 
 ./deployments:
+total 6012
+-rw-r--r--. 1 default root 6155452 Jul 16 13:10 ROOT.war
 
-total 12024
--rwxr-xr-x 1 veer staff 6155452 Jul 5 2015 ROOT.war
+./modules:
+total 0
+drwxr-xr-x. 2 default root 46 Jul 16 13:09 cfg
+
+./modules/cfg:
+total 0
+-rw-r--r--. 1 default root 0 Jul 16 13:06 config-1.cfg
+-rw-r--r--. 1 default root 0 Jul 16 13:06 config-2.cfg
 ....
 
 *Step 3: Using builder image*
@@ -198,5 +209,10 @@ route.route.openshift.io/myapp exposed
 You can use the route to access the application using the URL.
 
 ```
-oc get route
+$ oc get route
+```
+
+Delete project 
+```
+oc delete project binarydeploy-UserName
 ```
