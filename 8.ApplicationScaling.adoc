@@ -13,6 +13,9 @@ Then we will learn to setup horizontal pod autocaler that automatically scales y
 
 == Deploy an Application to Scale
 === Create a new Project
+```
+oc new-project scale-up-down-UserName
+```
 
 Replace **UserName** with yours before creating the project.
 
@@ -310,7 +313,7 @@ hpademo   Deployment/hpademo   0%/50%          1         10        1          13
 == Clean up
 
 Once you are done with your testing run
-`oc delete all --all` to clean up all the artifacts and `oc delete project ProjectName` to delete the project
+`oc delete all --all` to clean up all the artifacts and `oc delete project scale-up-down-UserName` to delete the project
 
 == Summary
 
