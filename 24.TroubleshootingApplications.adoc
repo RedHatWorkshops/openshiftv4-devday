@@ -370,6 +370,11 @@ Since the image is tagged as v1 in the above example the default pull policy is 
 - Use unique tags (e.g. based on your source control commit id)
 - Specify ImagePullPolicy: Always in your deployment.
 
+* Delete project
+```
+$ oc  delete project troubleshooting-apps-userXX
+```
+
 == Summary
 .In this lab we learned how to troubleshoot the following
 - Image Pull Failures
