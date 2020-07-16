@@ -18,7 +18,7 @@ Create a new project
 CAUTION:  Substitute UserName with your value below
 
 ....
-oc new-project multitier-UserName
+oc new-project multitiered-UserName
 ....
 
 We will use MongoDB. You can deploy MongoDB using command line as follows:

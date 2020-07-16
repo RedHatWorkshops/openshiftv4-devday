@@ -36,7 +36,7 @@ We will continue with an example that we used in the lab <<17.CodePromotion.adoc
 
 CAUTION:  Substitute UserName with your value below
 ----
-$ oc project development-UserName
+$ oc new-project development-UserName
 ----
 
 * OpenShift Pipelines is installed and managed by an operator. This operator also installs a bunch of cluster level tasks. Let us look at the cluster tasks by running
