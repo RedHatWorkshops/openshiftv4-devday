@@ -46,7 +46,7 @@ pip install openshift
 
 Create Shortcut to ansible role
 ```
-ln -s $pwd/.workshop/scripts/crw/code-ready/  /etc/ansible/roles/
+ln -s $(pwd)/.workshop/scripts/crw/code-ready/  /etc/ansible/roles/
 ```
 
 Create ansible file for deployment.
