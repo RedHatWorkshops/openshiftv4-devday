@@ -4,9 +4,13 @@ This is a developer day workshop for OpenShift Container Platform
 
 == Prerequisites
 
-* An OCP 4.x Cluster (currently on 4.1 cluster you will need 4.2 dev console installed)
+* An OCP 4.x Cluster 
 * A workstation with command line tools `oc`,`kubectl` and `odo` installed
 * A user account on this cluster
+
+== Deployment options 
+* Deploy workshop on RHPDS using  <<homeroom.adoc#,Homeroom>>
+* Run locally on your OpenShift Cluster 
 
 == Table of Contents
 
