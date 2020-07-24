@@ -97,9 +97,9 @@ spec:
       name: PATCH_IMAGE
       type: string
   resources:
-    - name: app-git
+    - name: source-code
       type: git
-    - name: app-image
+    - name: container-image
       type: image
   tasks:
     - name: build-app
@@ -109,10 +109,10 @@ spec:
       resources:
         inputs:
           - name: source
-            resource: app-git
+            resource: source-code
         outputs:
           - name: image
-            resource: app-image
+            resource: container-image
       taskRef:
         kind: ClusterTask
         name: s2i-php
@@ -128,7 +128,7 @@ spec:
       resources:
         inputs:
           - name: source
-            resource: app-git
+            resource: source-code
       runAfter:
         - build-app
       taskRef:
@@ -172,7 +172,7 @@ spec:
       resources:
         inputs:
           - name: source
-            resource: app-git
+            resource: source-code
       runAfter:
         - update-qa-deployment-image
       taskRef:
