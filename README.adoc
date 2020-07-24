@@ -9,7 +9,7 @@ This is a developer day workshop for OpenShift Container Platform
 * A user account on this cluster
 
 == Deployment options 
-* To deploy workshop on RHPDS using  <<homeroom.adoc#,Homeroom>>
+* Deploy workshop on RHPDS using  <<homeroom.adoc#,Homeroom>>
 * Run locally on your OpenShift Cluster 
 
 == Table of Contents
