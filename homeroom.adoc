@@ -44,12 +44,12 @@ pip install kubernetes
 pip install openshift
 ```
 
-**Create Shortcut to ansible role**
+Create Shortcut to ansible role
 ```
 ln -s $pwd/.workshop/scripts/crw/code-ready/  /etc/ansible/roles/
 ```
 
-**Create ansible file for deployment.**
+Create ansible file for deployment.
 ```
 cat crw.yml 
 - hosts: localhost
@@ -63,17 +63,19 @@ cat crw.yml
 
 ```
 
-**To Create  CRW deployment**
+To Create  CRW deployment
 ```
-ansible-playbook crw.yml -e  "delete_deployment=true"
+ansible-playbook crw.yml -e  "delete_deployment=false"
 ```
 
-**Delete CRW deployment**
+Delete CRW deployment
 ```
 ansible-playbook crw.yml -e  "delete_deployment=true"
 ```
 
 == openshiftv4-devday-homeroom deployment Instructions
+
+NOTE: The openshiftv4-devday-homeroom will automatically use the pre-provisioned users in the OpenShift 4.4 Workshop catalog.  
 
 Create project
 ```
@@ -101,3 +103,6 @@ Destroy hosted workshop deployment
 .workshop/scripts/delete-spawner.sh --settings=hosted-workshop
 ```
 
+=== Source Code
+
+Link: https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom
