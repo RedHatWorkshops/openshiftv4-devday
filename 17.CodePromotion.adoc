@@ -69,6 +69,11 @@ NAME          IMAGE REPOSITORY                                                  
 TED                                                                                                         
 welcome-php   image-registry.openshift-image-registry.svc:5000/development-user1/welcome-php   latest   Abou
 t a minute ago                                                                                              
+
+###
+## Describe image stream 
+###
+
 [user2@cli-2-b2pms ~]$ oc describe is welcome-php                                                           
 Name:                   welcome-php                                                                         
 Namespace:              development-user1                                                                   

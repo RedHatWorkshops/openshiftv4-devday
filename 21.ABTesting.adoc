@@ -59,8 +59,7 @@ This shows `I am VERSION 1` as the output.
 Let us run curl 20 times with `for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done`
 
 ....
-$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
-one
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
@@ -146,8 +145,7 @@ Let us again run curl 20 times with `for i in {1..20}; do curl -w "\n" $(oc get 
 You'll see out of every 10 requests 9 go to service `app-a` and 1 goes to service `app-b`
 
 ....
-$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
-one
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39
@@ -197,8 +195,7 @@ routes/abtest  Service  app-b  50 (50%)
 * Test again and note the traffic is evenly distributed between the two versions
 
 ....
-$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
-one                                                                                                         
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done                                                                                                         
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
  I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
  I am VERSION 1 <br><br>My Pod IP is : 10.129.2.39                                                          
@@ -238,8 +235,7 @@ routes/abtest  Service  app-b  100 (100%)
 * Test again
 
 ....
-$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); d
-one                                                                                                         
+$ for i in {1..20}; do curl -w "\n" $(oc get route abtest --template={{.spec.host}}); done                                                                                                         
  I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
  I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
  I am VERSION 2 <br><br>My Pod IP is : 10.128.2.48                                                          
