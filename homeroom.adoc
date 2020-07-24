@@ -63,7 +63,8 @@ cat crw.yml
 
 ```
 
-To Create  CRW deployment
+To Create  CRW deployment  
+
 NOTE: You may have to pass the ` -e 'ansible_python_interpreter=/usr/bin/python3'` if you are using python2 by default in your enviornment.
 ```
 ansible-playbook crw.yml -e  "delete_deployment=false"
