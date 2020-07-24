@@ -4,7 +4,7 @@
 image::https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom/blob/master/images/workshop-dashboard.png[]  
 
 
-== Tested on 
+===== Tested on 
 * RHPDS - "OpenShift 4.4 Workshop"
 
 
@@ -13,16 +13,16 @@ image::https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom/blob/maste
 
 == Configure dependencies
 
-===== Install OpenShift Pipelines
+==== Install OpenShift Pipelines
 https://docs.openshift.com/container-platform/4.4/pipelines/installing-pipelines.html[Installing OpenShift Pipelines]
 
-===== Install Service Catalog as administrator
+==== Install Service Catalog as administrator
 https://docs.openshift.com/container-platform/4.4/applications/service_brokers/installing-service-catalog.html[Installing Service Catalog]
 
-===== Install Template Service Broker as administrator
+==== Install Template Service Broker as administrator
 https://docs.openshift.com/container-platform/4.4/applications/service_brokers/installing-template-service-broker.html[Installing the Template Service Broker]
 
-===== Install CodeReady WorkSpaces using ansible role
+==== Install CodeReady WorkSpaces using ansible role
 
 ssh into jumpbox
 
@@ -76,32 +76,28 @@ ansible-playbook crw.yml -e  "delete_deployment=true"
 
 == openshiftv4-devday-homeroom deployment Instructions
 
-
-## Deploy multi-user workshop
-
-
-**Create project**
+Create project
 ```
 oc new-project workshop
 ```
 
-**Create hosted workshop deployment**
+Create hosted workshop deployment
 ```
 .workshop/scripts/deploy-spawner.sh --settings=hosted-workshop
 ```
 
-**Access deployment**
+Access deployment
 ```
 oc get route/openshiftv4-devday
 ```
 
-**Access the workshop**
+Access the workshop
 ```
 username: openshiftusername
 password: openshiftpassword
 ```
 
-**Destroy hosted workshop deployment**
+Destroy hosted workshop deployment
 ```
 .workshop/scripts/delete-spawner.sh --settings=hosted-workshop
 ```
