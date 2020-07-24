@@ -4,8 +4,7 @@
 image::https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom/blob/master/images/workshop-dashboard.png[]  
 
 
-===== Tested on 
-* RHPDS - "OpenShift 4.4 Workshop"
+Tested on RHPDS  Catalog Item - "OpenShift 4.4 Workshop"
 
 
 == Deploy OpenShift 4.4 Workshop
