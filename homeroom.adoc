@@ -1,0 +1,108 @@
+
+= OpenShift Container Platform Developer Day - Homeroom 
+
+image::https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom/blob/master/images/workshop-dashboard.png[]  
+
+
+== Tested on 
+* RHPDS - "OpenShift 4.4 Workshop"
+
+
+== Deploy OpenShift 4.4 Workshop
+* In RHPDS deploy the OpenShift 4.4 Workshop catalog item under the workshops folder.
+
+== Configure dependencies
+
+===== Install OpenShift Pipelines
+https://docs.openshift.com/container-platform/4.4/pipelines/installing-pipelines.html[Installing OpenShift Pipelines]
+
+===== Install Service Catalog as administrator
+https://docs.openshift.com/container-platform/4.4/applications/service_brokers/installing-service-catalog.html[Installing Service Catalog]
+
+===== Install Template Service Broker as administrator
+https://docs.openshift.com/container-platform/4.4/applications/service_brokers/installing-template-service-broker.html[Installing the Template Service Broker]
+
+===== Install CodeReady WorkSpaces using ansible role
+
+ssh into jumpbox
+
+Clone openshiftv4-devday-homeroom repo
+```
+git clone https://github.com/RedHatWorkshops/openshiftv4-devday-homeroom.git
+```
+
+cd into  openshiftv4-devday-homeroom folder
+```
+cd openshiftv4-devday-homeroom
+```
+
+.prerequisites for CRW Ansible role
+* install ansible
+* install openshift cli
+* install the pip dependencies 
+```
+pip install kubernetes
+pip install openshift
+```
+
+**Create Shortcut to ansible role**
+```
+ln -s $pwd/.workshop/scripts/crw/code-ready/  /etc/ansible/roles/
+```
+
+**Create ansible file for deployment.**
+```
+cat crw.yml 
+- hosts: localhost
+  become: yes
+  vars:
+    route_subdomain: apps.ocp4.example.com
+    users: 5
+    workshop_che_user_password: openshift
+  roles:
+    - code-ready
+
+```
+
+**To Create  CRW deployment**
+```
+ansible-playbook crw.yml -e  "delete_deployment=true"
+```
+
+**Delete CRW deployment**
+```
+ansible-playbook crw.yml -e  "delete_deployment=true"
+```
+
+== openshiftv4-devday-homeroom deployment Instructions
+
+
+## Deploy multi-user workshop
+
+
+**Create project**
+```
+oc new-project workshop
+```
+
+**Create hosted workshop deployment**
+```
+.workshop/scripts/deploy-spawner.sh --settings=hosted-workshop
+```
+
+**Access deployment**
+```
+oc get route/openshiftv4-devday
+```
+
+**Access the workshop**
+```
+username: openshiftusername
+password: openshiftpassword
+```
+
+**Destroy hosted workshop deployment**
+```
+.workshop/scripts/delete-spawner.sh --settings=hosted-workshop
+```
+
