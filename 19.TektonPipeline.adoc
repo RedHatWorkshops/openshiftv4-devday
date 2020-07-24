@@ -32,11 +32,11 @@ We will continue with an example that we used in the lab <<17.CodePromotion.adoc
 
 == Create a Tekton Pipeline
 
-* We have created two projects with names for Development and QA in the previous lab. Switch the context to development project
+* We have created two projects with names for Development and QA in the previous lab. 
 
 CAUTION:  Substitute UserName with your value below
 ----
-$ oc new-project development-UserName
+$ oc project development-UserName
 ----
 
 * OpenShift Pipelines is installed and managed by an operator. This operator also installs a bunch of cluster level tasks. Let us look at the cluster tasks by running
@@ -91,18 +91,19 @@ spec:
       description: QA  project name
       name: QA_PROJ
       type: string
+    - default: >-
+        --patch={"spec":{"template":{"spec":{"containers":[{"name":"$(params.APP_NAME)","image":"image-registry.openshift-image-registry.svc:5000/$(params.QA_PROJ)/$(params.APP_NAME):promote-qa"}]}}}}
+      description: patch image
+      name: PATCH_IMAGE
+      type: string
   resources:
     - name: source-code
       type: git
     - name: container-image
       type: image
   tasks:
-    - name: build-in-dev
+    - name: build-app
       params:
-        - name: MINOR_VERSION
-          value: '2'
-        - name: PATH_CONTEXT
-          value: .
         - name: TLSVERIFY
           value: 'false'
       resources:
@@ -122,8 +123,14 @@ spec:
             - rollout
             - latest
             - dc/$(params.APP_NAME)
+            - '-n'
+            - $(params.DEV_PROJ)
+      resources:
+        inputs:
+          - name: source
+            resource: source-code
       runAfter:
-        - build-in-dev
+        - build-app
       taskRef:
         kind: ClusterTask
         name: openshift-client
@@ -133,9 +140,23 @@ spec:
           value:
             - tag
             - '$(params.DEV_PROJ)/$(params.APP_NAME):latest'
-            - '$(params.DEV_PROJ)/$(params.APP_NAME):promote-qa'
+            - '$(params.QA_PROJ)/$(params.APP_NAME):promote-qa'
       runAfter:
         - deploy-in-dev
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: update-qa-deployment-image
+      params:
+        - name: ARGS
+          value:
+            - patch
+            - dc/$(params.APP_NAME)
+            - $(params.PATCH_IMAGE)
+            - '-n'
+            - $(params.QA_PROJ)
+      runAfter:
+        - tag-image
       taskRef:
         kind: ClusterTask
         name: openshift-client
@@ -148,12 +169,15 @@ spec:
             - dc/$(params.APP_NAME)
             - '-n'
             - $(params.QA_PROJ)
+      resources:
+        inputs:
+          - name: source
+            resource: source-code
       runAfter:
-        - tag-image
+        - update-qa-deployment-image
       taskRef:
         kind: ClusterTask
         name: openshift-client
-
 ----
 
 * `taskRef` are pointing to `ClusterTask`
@@ -162,18 +186,18 @@ spec:
 * Parameters `APP_NAME`, `DEV_PROJ` and `QA_PROJ` are used to supply your own values or application name, development project and qa project respectively while running the pipeline
 * `runAfter` allows you to sequence the tasks per your needs
 
-The above https://raw.githubusercontent.com/RedHatWorkshops/openshiftv4-devday/master/tekton-pipeline.yaml[pipeline] is provided to you so that you can create it directly using CLI.
+The above https://raw.githubusercontent.com/RedHatWorkshops/welcome-php/master/tekton-pipeline/tekton-pipeline.yml[pipeline] is provided to you so that you can create it directly using CLI.
 
 * Create pipeline running the following command
 
 ----
-$ oc create -f https://raw.githubusercontent.com/RedHatWorkshops/openshiftv4-devday/master/tekton-pipeline.yaml
+$ oc create -f https://raw.githubusercontent.com/RedHatWorkshops/welcome-php/master/tekton-pipeline/tekton-pipeline.yml
 ----
 
 Run `tkn pipelines list` to verify
 
 ----
-% tkn pipeline list
+$ tkn pipeline list
 NAME                     AGE             LAST RUN                        STARTED          DURATION    STATUS
 multi-project-pipeline   2 minutes ago   multi-project-pipeline-hbff55   12 minutes ago   2 minutes   Succeeded
 ----
@@ -214,7 +238,7 @@ CAUTION:  Substitute UserName with your value below
 * `APP_NAME` value `welcome-php`
 * `DEV_PROJ` value `development-UserName`
 * `QA_PROJ` value `testing-UserName`
-
+* `PATCH_IMAGE`  value `--patch={"spec":{"template":{"spec":{"containers":[{"name":"welcome-php","image":"image-registry.openshift-image-registry.svc:5000/testing-UserName/welcome-php:promote-qa"}]}}}}`
 
 You can verify that the corresponding resources are created on command line by running
 
@@ -230,8 +254,14 @@ and the running pipeline
 ----
 $ tkn pipelinerun list
 NAME                            STARTED          DURATION   STATUS             
-multi-project-pipeline-77eisq   23 seconds ago   ---        Running
+multi-project-pipeline-qzv2et   23 seconds ago   ---        Running
 ----
+
+Run the command below to talk the logs of the pipeline build.
+----
+$ tkn pipelinerun logs -f  -a multi-project-pipeline-qzv2et
+----
+
 
 Developer Console also shows the running pipeline
 
@@ -245,5 +275,11 @@ image::images/tekton8.png[image,2000]
 
 As the pipeline gets to deploy steps you will note the application gets redeployed. You can notice the pod getting redeployed on the developer console.
 
+== Delete projects
 
+CAUTION:  Substitute UserName with your value below
+----
+$ oc delete project development-UserName
+$ oc delete project testing-UserName
+----
 

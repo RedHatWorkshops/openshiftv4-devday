@@ -16,18 +16,19 @@ spec:
       description: QA  project name
       name: QA_PROJ
       type: string
+    - default: >-
+        --patch={"spec":{"template":{"spec":{"containers":[{"name":"$(params.APP_NAME)","image":"image-registry.openshift-image-registry.svc:5000/$(params.QA_PROJ)/$(params.APP_NAME):promote-qa"}]}}}}
+      description: patch image
+      name: PATCH_IMAGE
+      type: string
   resources:
     - name: source-code
       type: git
     - name: container-image
       type: image
   tasks:
-    - name: build-in-dev
+    - name: build-app
       params:
-        - name: MINOR_VERSION
-          value: '2'
-        - name: PATH_CONTEXT
-          value: .
         - name: TLSVERIFY
           value: 'false'
       resources:
@@ -47,8 +48,14 @@ spec:
             - rollout
             - latest
             - dc/$(params.APP_NAME)
+            - '-n'
+            - $(params.DEV_PROJ)
+      resources:
+        inputs:
+          - name: source
+            resource: source-code
       runAfter:
-        - build-in-dev
+        - build-app
       taskRef:
         kind: ClusterTask
         name: openshift-client
@@ -58,9 +65,23 @@ spec:
           value:
             - tag
             - '$(params.DEV_PROJ)/$(params.APP_NAME):latest'
-            - '$(params.DEV_PROJ)/$(params.APP_NAME):promote-qa'
+            - '$(params.QA_PROJ)/$(params.APP_NAME):promote-qa'
       runAfter:
         - deploy-in-dev
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: update-qa-deployment-image
+      params:
+        - name: ARGS
+          value:
+            - patch
+            - dc/$(params.APP_NAME)
+            - $(params.PATCH_IMAGE)
+            - '-n'
+            - $(params.QA_PROJ)
+      runAfter:
+        - tag-image
       taskRef:
         kind: ClusterTask
         name: openshift-client
@@ -73,8 +94,12 @@ spec:
             - dc/$(params.APP_NAME)
             - '-n'
             - $(params.QA_PROJ)
+      resources:
+        inputs:
+          - name: source
+            resource: source-code
       runAfter:
-        - tag-image
+        - update-qa-deployment-image
       taskRef:
         kind: ClusterTask
         name: openshift-client

@@ -27,25 +27,23 @@ NOTE: Change userXX to your username provided by your  workshop coordinator.
 
 *Create image that fails pull*
 ```
-$ oc  run fail --image=tcij1013/dne:v1.0.0
+$ oc run fail --generator=run-pod/v1 --image=tcij1013/dne:v1.0.0
 ```
 
 *Check the status of the image*
 ```
 oc get pods
-NAME            READY   STATUS             RESTARTS   AGE
-fail-1-8tn7v    0/1     ImagePullBackOff   0          26s
-fail-1-deploy   1/1     Running            0          35s
+NAME   READY   STATUS         RESTARTS   AGE
+fail   0/1     ErrImagePull   0          60s
 ```
 
 *Inspect the pod*
 ```
-$ oc describe pod fail-1-8tn7v
+$ oc describe pod fail
 ```
 
 *As we can see the pod failed because it could not pull down the image.*
 ```
-Controlled By:  ReplicationController/fail-1
 Containers:
   fail:
     Container ID:
@@ -57,16 +55,18 @@ Containers:
       Reason:       ImagePullBackOff
     Ready:          False
     Restart Count:  0
-    Environment:    <none>
-    Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from default-token-dnn6h (ro)
+    Limits:
+      cpu:     500m
+      memory:  1536Mi
+    Requests:
+      cpu:        50m
+      memory:     256Mi
 ```
 
 
-*Delete the deployment*
+*Delete the failing pod*
 ```
-$ oc delete dc/fail
-deploymentconfig.apps.openshift.io "fail" deleted
+$ oc delete pod fail
 ```
 
 === Application Crashing
@@ -239,6 +239,11 @@ Deploy nodejs app
 $ oc new-app https://github.com/sclorg/nodejs-ex -l name=nodejs
 ```
 
+Wait for build to complete
+```
+$ oc logs bc/nodejs-ex -f
+```
+
 Provide a bad health configuration to OpenShift
 ```
 $ oc set probe dc/nodejs-ex --liveness --readiness --initial-delay-seconds=30 --failure-threshold=3 --get-url=http://:8080/healthz
@@ -246,7 +251,7 @@ $ oc set probe dc/nodejs-ex --liveness --readiness --initial-delay-seconds=30 --
 
 Use `oc events` to view the health status.
 ```
-$ oc get events
+$ oc get events | grep nodejs-ex-1
 35s         Normal    Created             pod/nodejs-ex-1-dr2wr                  Created container nodejs-ex
 35s         Normal    Started             pod/nodejs-ex-1-dr2wr                  Started container nodejs-ex
 36s         Warning   Unhealthy           pod/nodejs-ex-1-dr2wr                  Liveness probe failed: HTTP probe failed with statuscode: 404
@@ -372,7 +377,7 @@ Since the image is tagged as v1 in the above example the default pull policy is 
 
 * Delete project
 ```
-$ oc  delete project troubleshooting-apps-userXX
+$ oc delete project troubleshooting-apps-userXX
 ```
 
 == Summary
